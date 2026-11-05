@@ -1,0 +1,77 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}微信登录白名单{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">微信登录白名单</h1>
+<p class="ad-desc">
+  启用白名单后，<b>只有名单里的微信</b>才能登录系统，避免任何人拿到链接就自动注册成党员。
+  可以先只填姓名和手机号，<b>openid 留空</b>，等本人第一次用微信登录时自动补上；也可以由管理员手工填一个 openid 做联调。
+  当前白名单状态：<b>{{ '已启用' if enabled else '已关闭' }}</b>，登录方式：<b>{{ login_mode }}</b>
+  —— 可在 <a href="{{ url_for('admin.wechat_settings') }}">微信设置</a> 里修改。
+</p>
+
+<details class="ad-panel" open>
+  <summary><b>＋ 添加白名单</b></summary>
+  <form method="post" action="{{ url_for('admin.whitelist_create') }}" class="ad-form">
+    <label>姓名<input type="text" name="name" required placeholder="如 张三"></label>
+    <label>手机号（可选）<input type="text" name="phone"></label>
+    <label>openid（可留空）<input type="text" name="openid" placeholder="微信 openid，留空等本人首次登录自动补"></label>
+    <label>角色
+      <select name="role">
+        {% for k, n in roles %}<option value="{{ k }}" {{ 'selected' if k == 'member' }}>{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>绑定已有账号（可选）
+      <select name="user_id">
+        <option value="">不绑定，首次登录自动建号</option>
+        {% for u in users %}<option value="{{ u.id }}">{{ u.real_name or u.username }}（{{ u.username }}）</option>{% endfor %}
+      </select>
+    </label>
+    <label>备注<input type="text" name="note" placeholder="如：本学期新转入"></label>
+    <button class="ad-btn" type="submit">加入白名单</button>
+  </form>
+</details>
+
+<div class="ad-panel">
+  <table class="ad-table">
+    <thead>
+      <tr><th>姓名</th><th>手机号</th><th>openid</th><th>角色</th><th>绑定账号</th><th>最近登录</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+    {% for w in rows %}
+      <tr>
+        <td>{{ w.name }}{% if w.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}
+          {% if w.note %}<div class="ad-desc">{{ w.note }}</div>{% endif %}</td>
+        <td>{{ w.phone or '—' }}</td>
+        <td style="word-break:break-all">{{ w.openid or '未绑定（等首次登录）' }}</td>
+        <td>{{ w.role_label }}</td>
+        <td>{{ w.user.real_name or w.user.username if w.user else '—' }}</td>
+        <td>{{ w.last_login_at.strftime('%Y-%m-%d %H:%M') if w.last_login_at else '—' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.whitelist_update', wl_id=w.id) }}" class="ad-inline">
+            <input type="text" name="phone" value="{{ w.phone }}" placeholder="手机号" style="width:110px">
+            <input type="text" name="openid" value="{{ w.openid or '' }}" placeholder="openid" style="width:150px">
+            <select name="role">
+              {% for k, n in roles %}<option value="{{ k }}" {{ 'selected' if w.role == k }}>{{ n }}</option>{% endfor %}
+            </select>
+            <button class="ad-btn small" type="submit">保存</button>
+          </form>
+          <div class="ad-ops">
+            <form method="post" action="{{ url_for('admin.whitelist_toggle', wl_id=w.id) }}" class="ad-inline">
+              <button class="ad-btn small ghost" type="submit">{{ '停用' if w.is_active else '启用' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.whitelist_delete', wl_id=w.id) }}" class="ad-inline"
+                  onsubmit="return confirm('确定从白名单移除 {{ w.name }}？');">
+              <button class="ad-btn small danger" type="submit">删除</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="ad-empty">白名单为空。当前若启用白名单，任何人都无法用微信登录，请先添加成员。</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

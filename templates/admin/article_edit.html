@@ -1,0 +1,43 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}编辑文章{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">编辑文章</h1>
+<p class="ad-desc">
+  {% if article.is_demo %}<span class="ad-tag">测试数据</span> 这是一篇初始化样例，可改成真实材料，或直接删除。{% endif %}
+  前台地址：<a href="{{ url_for('pages.article', article_id=article.id) }}" target="_blank">/article/{{ article.id }}</a>
+</p>
+
+<form method="post" action="{{ url_for('admin.article_update', article_id=article.id) }}" class="ad-form ad-panel">
+  <label>标题<input type="text" name="title" value="{{ article.title }}" required maxlength="120"></label>
+  <label>分类
+    <select name="category_id">
+      {% for c in categories %}
+      <option value="{{ c.id }}" {{ 'selected' if article.category_id == c.id }}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>摘要<textarea name="summary" rows="2">{{ article.summary or '' }}</textarea></label>
+  <label>正文<textarea name="content" rows="14">{{ article.content or '' }}</textarea></label>
+  <label>封面图地址<input type="text" name="cover_url" value="{{ article.cover_url or '' }}"></label>
+  <label>计入学习时长（分钟）<input type="number" name="study_minutes" value="{{ article.study_minutes or 8 }}" min="1" max="180"></label>
+  <label>状态
+    <select name="status">
+      <option value="draft" {{ 'selected' if article.status == 'draft' }}>草稿（前台不可见）</option>
+      <option value="published" {{ 'selected' if article.status == 'published' }}>已发布</option>
+    </select>
+  </label>
+  <div class="ad-actions">
+    <button class="ad-btn" type="submit">保存修改</button>
+    <a class="ad-btn ghost" href="{{ url_for('admin.articles') }}">返回列表</a>
+  </div>
+</form>
+
+<div class="ad-panel">
+  <h2>数据</h2>
+  <p class="ad-desc">阅读数 {{ article.view_count }}　发布状态 {{ '已发布' if article.status == 'published' else '草稿' }}
+    　发布时间 {{ article.published_at.strftime('%Y-%m-%d %H:%M') if article.published_at else '—' }}</p>
+  <p class="ad-desc">学习打卡记录会写入 study_record 表，前台「我的」和数据看板的累计学习时长都来自它。</p>
+</div>
+
+{% endblock %}

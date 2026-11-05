@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block navtitle %}HXAI云{% endblock %}
+
+{% block content %}
+<div class="page">
+  {# 公众号主页头部（结构参照样例，数据来自数据库统计） #}
+  <div class="acct">
+    <div class="acct-row">
+      <div class="avatar">HX</div>
+      <div>
+        <div class="acct-name">{{ config.SITE_NAME }}</div>
+        <div class="acct-desc">学习专栏 / 三会一课 / 活动报名 / 电子台账 / 党建风采 / 数据看板</div>
+      </div>
+    </div>
+    <div class="acct-meta" id="acctMeta">
+      <span>加载中…</span>
+    </div>
+  </div>
+
+  <a class="searchbar" href="{{ url_for('pages.study') }}">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.4">
+      <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/>
+    </svg>
+    <span>搜索文章、活动、台账资料</span>
+  </a>
+
+  {# 六个功能入口 #}
+  <div class="quick">
+    <a href="{{ url_for('pages.study') }}"><span class="qicon">学</span>学习专栏</a>
+    <a href="{{ url_for('pages.meetings') }}"><span class="qicon">会</span>三会一课</a>
+    <a href="{{ url_for('pages.activities') }}"><span class="qicon">报</span>活动报名</a>
+    <a href="{{ url_for('pages.ledger') }}"><span class="qicon">档</span>电子台账</a>
+    <a href="{{ url_for('pages.gallery') }}"><span class="qicon">风</span>党建风采</a>
+    <a href="{{ url_for('pages.dashboard') }}"><span class="qicon">数</span>数据看板</a>
+  </div>
+
+  {# 最新发布（接口渲染，不是写死的） #}
+  <div class="feed" id="homeFeed">
+    <div class="card" style="padding:20px;text-align:center;color:#999">加载中…</div>
+  </div>
+</div>
+{% endblock %}

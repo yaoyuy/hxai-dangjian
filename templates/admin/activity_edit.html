@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}编辑活动{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">编辑活动</h1>
+<p class="ad-desc">前台地址：<a href="{{ url_for('pages.activity_detail', activity_id=activity.id) }}" target="_blank">/activity/{{ activity.id }}</a></p>
+
+<form method="post" action="{{ url_for('admin.activity_update', activity_id=activity.id) }}" class="ad-form ad-panel">
+  <label>标题<input type="text" name="title" value="{{ activity.title }}" required></label>
+  <label>类型
+    <select name="kind">
+      {% for k, n in kinds %}<option value="{{ k }}" {{ 'selected' if activity.kind == k }}>{{ n }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>开始时间<input type="datetime-local" name="start_at"
+    value="{{ activity.start_at.strftime('%Y-%m-%dT%H:%M') if activity.start_at else '' }}"></label>
+  <label>报名截止<input type="datetime-local" name="signup_deadline"
+    value="{{ activity.signup_deadline.strftime('%Y-%m-%dT%H:%M') if activity.signup_deadline else '' }}"></label>
+  <label>地点<input type="text" name="location" value="{{ activity.location or '' }}"></label>
+  <label>参加对象<input type="text" name="target" value="{{ activity.target or '' }}"></label>
+  <label>名额上限（0=不限）<input type="number" name="capacity" value="{{ activity.capacity or 0 }}" min="0"></label>
+  <label>简介<textarea name="summary" rows="3">{{ activity.summary or '' }}</textarea></label>
+  <label>活动安排<textarea name="content" rows="8">{{ activity.content or '' }}</textarea></label>
+  <label>状态
+    <select name="status">
+      {% for k, n in statuses %}<option value="{{ k }}" {{ 'selected' if activity.status == k }}>{{ n }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="ad-actions">
+    <button class="ad-btn" type="submit">保存修改</button>
+    <a class="ad-btn ghost" href="{{ url_for('admin.activities') }}">返回列表</a>
+  </div>
+</form>
+
+<div class="ad-panel">
+  <h2>报名名单（{{ enrollments|selectattr('status', 'equalto', 'confirmed')|list|length }} 人）</h2>
+  <table class="ad-table">
+    <thead><tr><th>姓名</th><th>账号</th><th>状态</th><th>报名时间</th></tr></thead>
+    <tbody>
+    {% for e in enrollments %}
+      <tr>
+        <td>{{ e.user.real_name if e.user else '—' }}</td>
+        <td>{{ e.user.username if e.user else '—' }}</td>
+        <td>{% if e.status == 'confirmed' %}<span class="ad-tag ok">已确认</span>{% else %}<span class="ad-tag">已取消</span>{% endif %}</td>
+        <td>{{ e.created_at.strftime('%Y-%m-%d %H:%M') if e.created_at else '—' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="ad-empty">还没有人报名</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block navtitle %}{{ article.title[:14] }}{% endblock %}
+
+{% block content %}
+<div class="page article">
+  <h1>{{ article.title }}</h1>
+  <div class="a-meta">
+    <span class="avatar" style="width:30px;height:30px;font-size:9px;border-radius:5px">HX</span>
+    <span class="an">{{ config.SITE_NAME }}</span>
+    <span>{{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</span>
+    <span>{{ article.category.name if article.category else '未分类' }}</span>
+    {% if article.is_demo %}<span class="chip todo">测试数据</span>{% endif %}
+  </div>
+
+  {% if article.cover_url %}
+  <img class="hero" src="{{ article.cover_url }}" alt="">
+  {% endif %}
+
+  <div style="font-size:16px;line-height:1.9;color:#333;margin-top:8px">
+    {{ article.content | safe }}
+  </div>
+
+  {% if article.media_type == 'video' and article.video_url %}
+  <video class="hero" controls src="{{ article.video_url }}"></video>
+  {% endif %}
+
+  <div class="a-actions">
+    <button id="studyBtn" data-id="{{ article.id }}">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/>
+      </svg>
+      记录学习
+    </button>
+    <button onclick="location.href='{{ url_for('pages.study') }}'">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      返回专栏
+    </button>
+  </div>
+
+  <div class="a-foot">
+    <span>阅读 {{ article.view_count }}</span>
+    <span>本篇计入学习时长 {{ article.study_minutes }} 分钟 · 我的累计 <b id="myStudyTotal">—</b></span>
+  </div>
+</div>
+{% endblock %}

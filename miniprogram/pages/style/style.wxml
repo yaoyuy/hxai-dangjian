@@ -1,0 +1,53 @@
+<view class="page has-tabbar">
+  <view class="page-title">支部风采</view>
+  <view class="page-sub">党建风采图墙与支部数据看板。</view>
+
+  <view class="panel" wx:if="{{stats}}">
+    <view class="stat-grid">
+      <view class="stat"><b>{{stats.total_members}}</b><text>党员总数</text></view>
+      <view class="stat"><b>{{stats.total_articles}}</b><text>学习文章</text></view>
+      <view class="stat"><b>{{stats.study_hours}}</b><text>累计学习小时</text></view>
+      <view class="stat"><b>{{stats.completion_rate}}%</b><text>任务完成率</text></view>
+    </view>
+    <view class="hint">数字来自 /api/stats/overview，生成时间：{{stats.generated_at}}</view>
+  </view>
+
+  <view class="sec-head"><text class="sec-title">功能入口</text></view>
+
+  <view class="big-entry" data-url="/pages/gallery/gallery" bindtap="go">
+    <view class="bi-ico">采</view>
+    <view class="bi-body">
+      <view class="bi-title">党建风采</view>
+      <view class="bi-sub">支部活动照片墙</view>
+    </view>
+    <view class="bi-arrow">›</view>
+  </view>
+
+  <view class="big-entry" data-url="/pages/dashboard/dashboard" bindtap="go">
+    <view class="bi-ico">看</view>
+    <view class="bi-body">
+      <view class="bi-title">数据看板</view>
+      <view class="bi-sub">党员构成、党费、学习与活动统计</view>
+    </view>
+    <view class="bi-arrow">›</view>
+  </view>
+
+  <view class="sec-head">
+    <text class="sec-title">风采预览</text>
+    <text class="sec-extra" data-url="/pages/gallery/gallery" bindtap="go">查看全部 ›</text>
+  </view>
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <block wx:else>
+    <view class="gal">
+      <view class="gitem" wx:for="{{preview}}" wx:key="id">
+        <image class="gimg" wx:if="{{item.img}}" src="{{item.img}}" mode="aspectFill" />
+        <view class="gph" wx:else>{{item.title}}</view>
+        <view class="gcap">
+          <view class="gtitle">{{item.title}}</view>
+          <view class="gsub" wx:if="{{item.sub}}">{{item.sub}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{!preview.length}}">暂无风采图片</view>
+  </block>
+</view>

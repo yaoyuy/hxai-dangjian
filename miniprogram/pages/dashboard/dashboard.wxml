@@ -1,0 +1,100 @@
+<view class="page">
+  <view class="crumb">支部风采 › <text>数据看板</text></view>
+  <view class="page-title">数据看板</view>
+  <view class="page-sub">全部数字由后端统计接口实时计算（不写死），生成时间：{{generatedAt || '—'}}</view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <!-- 概览 -->
+    <view class="panel" wx:if="{{ov}}">
+      <view class="panel-h">支部概览 {{ov.year}} 年</view>
+      <view class="stat-grid">
+        <view class="stat"><b>{{ov.total_members}}</b><text>党员总数</text></view>
+        <view class="stat"><b>{{ov.year_activities}}</b><text>年度活动</text></view>
+        <view class="stat"><b>{{ov.completion_rate}}%</b><text>任务完成率</text></view>
+        <view class="stat"><b>{{ov.study_hours}}</b><text>累计学习小时</text></view>
+        <view class="stat"><b>{{ov.total_articles}}</b><text>学习文章</text></view>
+        <view class="stat"><b>{{ov.total_files}}</b><text>台账文件</text></view>
+        <view class="stat"><b>{{ov.total_enrollments}}</b><text>活动报名人次</text></view>
+        <view class="stat"><b>{{ov.active_learners_this_month}}</b><text>本月学习人数</text></view>
+      </view>
+      <view class="row-line"><text class="k">累计学习时长</text><text class="v">{{ov.total_study_minutes}} 分钟</text></view>
+      <view class="row-line"><text class="k">党费应缴/已缴</text><text class="v">{{ov.dues_total}} / {{ov.dues_paid}} 条，未缴 {{ov.dues_unpaid}} 条，缴费率 {{ov.dues_paid_rate}}%</text></view>
+      <view class="row-line"><text class="k">待审组织关系</text><text class="v">{{ov.transfers_pending}} 条</text></view>
+    </view>
+
+    <!-- 每月活动柱状图（用 view 高度模拟，未引入任何第三方图表库） -->
+    <view class="panel">
+      <view class="panel-h">每月活动数量 {{monthYear ? '（' + monthYear + ' 年）' : ''}}</view>
+      <view class="panel-sub">全年合计 {{monthTotal}} 场；柱高按当月数量占最大值的比例换算。</view>
+      <view class="chart">
+        <view class="chart-col" wx:for="{{monthly}}" wx:key="label">
+          <view class="chart-num">{{item.count}}</view>
+          <view class="chart-bar {{item.peak ? 'peak' : ''}}" style="height:{{item.h}}rpx"></view>
+          <view class="chart-label">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{monthTotal === 0}}">本年度暂无活动记录</view>
+    </view>
+
+    <!-- 党员构成 -->
+    <view class="panel">
+      <view class="panel-h">党员构成</view>
+      <view class="panel-sub">按年龄结构统计，共 {{memberTotal}} 人。</view>
+      <view class="legend-row" wx:for="{{members}}" wx:key="group">
+        <view class="legend-dot"></view>
+        <view class="legend-name">{{item.group}}</view>
+        <view class="legend-bar"><view class="legend-inner" style="width:{{item.w}}%"></view></view>
+        <view class="legend-val">{{item.count}} 人</view>
+      </view>
+      <view class="empty" wx:if="{{!members.length}}">暂无党员构成数据</view>
+    </view>
+
+    <!-- 党费情况 -->
+    <view class="panel" wx:if="{{dues}}">
+      <view class="panel-h">党费情况</view>
+      <view class="panel-sub">{{dues.summary.formula}}</view>
+      <view class="row-line"><text class="k">应缴记录</text><text class="v">{{dues.summary.total}} 条（{{dues.summary.period}}）</text></view>
+      <view class="row-line"><text class="k">已缴 / 补缴</text><text class="v">{{dues.summary.paid}} / {{dues.summary.late}} 条</text></view>
+      <view class="row-line"><text class="k">未缴</text><text class="v">{{dues.summary.unpaid}} 条</text></view>
+      <view class="row-line"><text class="k">应缴金额</text><text class="v">{{dues.summary.amount_total}} 元</text></view>
+      <view class="row-line"><text class="k">已缴金额</text><text class="v">{{dues.summary.amount_paid}} 元</text></view>
+      <view class="row-line"><text class="k">缴费率</text><text class="v n">{{dues.summary.pay_rate}}%</text></view>
+
+      <view class="sec-head"><text class="sec-title">分月/分期趋势</text></view>
+      <view class="bar" wx:for="{{trend}}" wx:key="period">
+        <view class="legend-row" style="padding:0 0 6rpx">
+          <text class="legend-name">{{item.period}}</text>
+          <text class="legend-val" style="text-align:left">{{item.paid}}/{{item.total}} 条 · {{item.pay_rate}}%</text>
+        </view>
+        <view class="bar-inner" style="width:{{item.pay_rate}}%"></view>
+      </view>
+      <view class="empty" wx:if="{{!trend.length}}">暂无党费趋势数据</view>
+    </view>
+
+    <!-- 学习情况 -->
+    <view class="panel">
+      <view class="panel-h">学习情况</view>
+      <view class="panel-sub">按文章分类统计学习次数与时长（来自学习记录）。</view>
+      <view class="legend-row" wx:for="{{learning}}" wx:key="category">
+        <view class="legend-dot"></view>
+        <view class="legend-name">{{item.category}}</view>
+        <view class="legend-val" style="flex:1;text-align:left">{{item.study_times}} 次 · {{item.minutes}} 分钟（{{item.hours}} 小时）</view>
+      </view>
+      <view class="empty" wx:if="{{!learning.length}}">暂无学习记录</view>
+    </view>
+
+    <!-- 活动参与率 -->
+    <view class="panel">
+      <view class="panel-h">活动参与率</view>
+      <view class="panel-sub">capacity 为 0 表示不限人数，此时后端不计算参与率。</view>
+      <view class="row-line" wx:for="{{parts}}" wx:key="title" data-id="{{item.activity_id}}" bindtap="goActivity">
+        <text class="v">{{item.title}}</text>
+        <text class="n">{{item.enrolled}} 人<text wx:if="{{item.capacity}}"> / {{item.capacity}}</text><text wx:else>（不限人数）</text> · {{item.rate === null ? '—' : item.rate + '%'}}</text>
+      </view>
+      <view class="empty" wx:if="{{!parts.length}}">暂无活动参与数据</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block navtitle %}登录{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="sec-head"><h2>登录</h2></div>
+
+  <div class="form">
+    <div class="notice blue">
+      <b>{{ wx.notice or '登录说明' }}</b><br>
+      当前登录方式：{{ wx.login_mode_label }}。
+      <br>系统<b>不会伪造</b>微信身份：只要是本地账号登录，页面与接口都会标明「测试登录，非微信身份」，
+      不会假装已经拿到微信 openid。
+    </div>
+
+    {% if wx.test_login_allowed %}
+    <form id="loginForm">
+      <div class="field"><label>账号</label><input id="username" name="username" autocomplete="username" placeholder="请输入测试账号" required></div>
+      <div class="field"><label>密码</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" required></div>
+      <button class="btn" id="loginBtn" type="submit">测试登录</button>
+    </form>
+    {% else %}
+    <div class="hint">当前登录方式已设为「{{ wx.login_mode_label }}」，测试账号登录已关闭（可在后台「微信设置」里改回来）。</div>
+    {% endif %}
+
+    <div style="height:10px"></div>
+
+    {% if wx.wechat_configured or wx.wxapp_configured %}
+      {% if wx.oauth_url %}
+      <button class="btn ghost" id="wxLoginBtn" type="button" data-oauth-url="{{ wx.oauth_url }}">微信网页授权登录</button>
+      <div class="hint">
+        走微信网页授权（scope：{{ wx.oauth_scope }}），服务端用 code 换 openid。
+        <b>如实说明：</b>网页授权需要已认证服务号（或已认证的政府 / 事业单位 / 媒体订阅号），
+        个人订阅号打开这个链接会报「redirect_uri 参数错误」，这是微信的权限限制，不是系统故障。
+      </div>
+      {% else %}
+      <div class="hint">
+        已配置小程序参数（AppID：{{ wx.wxapp_appid }}）。小程序登录需要在<b>小程序里</b>调用 wx.login 拿 code，
+        在网页里点不出来；本机联调用下面的「开发联调」。
+      </div>
+      {% endif %}
+    {% else %}
+    <div class="hint">
+      还没有配置微信公众号 / 小程序的 AppID 与 AppSecret。管理员可以登录后台，在
+      「微信设置」页里填写（参数存在数据库里，不用改代码、不用改 .env）。
+    </div>
+    {% endif %}
+
+    {% if wx.test_login_allowed %}
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;color:#576b95;font-size:13px">开发联调：手工提供 openid（非真实微信授权）</summary>
+      <form id="devWxForm" style="margin-top:8px">
+        <div class="field"><label>openid</label><input id="devOpenid" placeholder="如 test_openid_zhangsan" required></div>
+        <div class="field"><label>昵称（可选）</label><input id="devNickname" placeholder="微信昵称"></div>
+        <button class="btn ghost" id="devWxBtn" type="submit">联调登录</button>
+      </form>
+      <div class="hint">
+        仅在测试模式可用：直接把这个 openid 当作微信身份走一遍白名单与建档逻辑，方便在没有小程序前端时验证登录链路。
+        它<b>不会</b>向微信校验，返回的提示里也会写明「openid 由开发者手工提供，非真实微信授权」。
+      </div>
+    </details>
+    {% endif %}
+
+    <div class="hint">
+      首次初始化数据库时会自动创建管理员账号，默认值来自 .env 的
+      <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>。
+      登录状态保存在服务端 session 中，刷新页面不会掉线。
+    </div>
+    <div class="hint">
+      也可以 <a href="{{ url_for('pages.index') }}" style="color:#576b95">先不登录浏览</a>（可看文章和活动列表，报名需登录）。
+    </div>
+  </div>
+</div>
+{% endblock %}

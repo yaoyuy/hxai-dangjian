@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}概览{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">数据概览</h1>
+<p class="ad-desc">以下数字全部来自数据库实时统计，随前台操作立即变化。</p>
+
+<div class="ad-cards">
+  <div class="ad-card"><b>{{ counts.published }}</b><span>已发布文章</span></div>
+  <div class="ad-card"><b>{{ counts.draft }}</b><span>草稿待发布</span></div>
+  <div class="ad-card"><b>{{ counts.activities }}</b><span>进行中活动</span></div>
+  <div class="ad-card"><b>{{ counts.members }}</b><span>党员账号</span></div>
+  <div class="ad-card"><b>{{ counts.enrollments }}</b><span>报名人次</span></div>
+  <div class="ad-card"><b>{{ counts.files }}</b><span>台账文件</span></div>
+  <div class="ad-card"><b>{{ counts.photos }}</b><span>风采图片</span></div>
+  <div class="ad-card"><b>{{ counts.dues }}</b><span>党费记录</span></div>
+  <div class="ad-card warn"><b>{{ counts.dues_unpaid }}</b><span>党费未缴</span></div>
+  <div class="ad-card warn"><b>{{ counts.transfers_pending }}</b><span>转接待审核</span></div>
+  <div class="ad-card"><b>{{ counts.whitelist }}</b><span>微信白名单</span></div>
+  <div class="ad-card warn"><b>{{ counts.demo }}</b><span>演示文章（可清理）</span></div>
+</div>
+
+<div class="ad-panel">
+  <h2>常用入口</h2>
+  <p class="ad-ops">
+    <a class="ad-btn" href="{{ url_for('admin.wechat_settings') }}">微信设置</a>
+    <a class="ad-btn ghost" href="{{ url_for('admin.whitelist') }}">微信登录白名单</a>
+    <a class="ad-btn ghost" href="{{ url_for('admin.dues') }}">党费管理</a>
+    <a class="ad-btn ghost" href="{{ url_for('admin.transfers') }}">组织关系转接</a>
+  </p>
+  <p class="ad-desc">
+    微信参数（AppID / AppSecret / Token）现在存在数据库里，在「微信设置」页填写保存即生效，不用改代码也不用改 .env。
+  </p>
+</div>
+
+{% if counts.demo > 0 %}
+<div class="ad-panel">
+  <h2>清理演示数据</h2>
+  <p class="ad-desc">
+    初始化时为了能立刻看到效果，系统写入了一批标注「测试数据」的样例（文章、活动、台账、风采）。
+    录入真实资料前可以把它们一次性清空；清理后前台「测试数据」提示条也会自动消失。
+  </p>
+  <form method="post" action="{{ url_for('admin.demo_clear') }}" class="ad-inline"
+        onsubmit="return confirm('确定删除全部演示数据？此操作不可恢复。');">
+    <input type="text" name="confirm" placeholder="输入 yes 确认" required>
+    <button class="ad-btn danger" type="submit">清理演示数据</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="ad-panel">
+  <h2>最近文章</h2>
+  <table class="ad-table">
+    <thead><tr><th>标题</th><th>状态</th><th>阅读</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for a in recent_articles %}
+      <tr>
+        <td>{{ a.title }}{% if a.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}</td>
+        <td>{% if a.status == 'published' %}<span class="ad-tag ok">已发布</span>{% else %}<span class="ad-tag warn">草稿</span>{% endif %}</td>
+        <td>{{ a.view_count }}</td>
+        <td><a href="{{ url_for('admin.article_edit', article_id=a.id) }}">编辑</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="ad-empty">还没有文章</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p><a class="ad-btn" href="{{ url_for('admin.articles') }}">去写文章</a></p>
+</div>
+
+<div class="ad-panel">
+  <h2>最近报名</h2>
+  <table class="ad-table">
+    <thead><tr><th>党员</th><th>活动</th><th>时间</th></tr></thead>
+    <tbody>
+    {% for e in recent_enrollments %}
+      <tr>
+        <td>{{ e.user.real_name if e.user else '—' }}</td>
+        <td>{{ e.activity.title if e.activity else '—' }}</td>
+        <td>{{ e.created_at.strftime('%Y-%m-%d %H:%M') if e.created_at else '—' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="3" class="ad-empty">还没有报名记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="ad-panel">
+  <h2>第一阶段说明</h2>
+  <p class="ad-desc">
+    当前用个人订阅号 <b>HXAI云</b> 测试，登录方式是<b>本地测试账号</b>，页面已标明「测试登录，非微信身份」，
+    系统<b>没有</b>获取微信 openid。个人订阅号无网页授权、无自定义菜单接口、无模板消息与支付权限——
+    这些能力要等第二阶段换成学校已认证的公众号后再接入，届时只需改 .env 里的 AppID/AppSecret 与 LOGIN_MODE，
+    代码结构不需要重写。
+  </p>
+</div>
+
+{% endblock %}

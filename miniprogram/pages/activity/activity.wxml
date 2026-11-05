@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:elif="{{a}}">
+    <view class="a-title">{{a.title}}</view>
+    <view class="a-meta">
+      <text class="mi tag">{{a.kind_label || a.kind}}</text>
+      <text class="mi chip-status {{a.status === 'open' ? 'done' : 'todo'}}">{{statusText}}</text>
+      <text class="mi demo-tag" wx:if="{{a.is_demo}}">测试数据</text>
+    </view>
+
+    <!-- 报名人数：capacity=0 表示不限人数，不写死 X/Y -->
+    <view class="panel">
+      <view class="stat-grid">
+        <view class="stat"><b>{{a.enrolled_count}}</b><text>已报名人数</text></view>
+        <view class="stat">
+          <b>{{a.capacity ? a.capacity : '不限'}}</b>
+          <text>{{a.capacity ? '名额上限' : '不限人数'}}</text>
+        </view>
+      </view>
+      <view class="row-line"><text class="k">已报名</text>
+        <text class="v">{{a.enrolled_count}} 人<text wx:if="{{a.capacity}}"> / {{a.capacity}} 人</text><text wx:else>（不限人数）</text></text>
+      </view>
+      <view class="row-line" wx:if="{{a.start_at}}"><text class="k">活动时间</text><text class="v">{{a.start_at}}<text wx:if="{{a.end_at}}"> 至 {{a.end_at}}</text></text></view>
+      <view class="row-line" wx:if="{{a.signup_deadline}}"><text class="k">报名截止</text><text class="v">{{a.signup_deadline}}</text></view>
+      <view class="row-line" wx:if="{{a.location}}"><text class="k">活动地点</text><text class="v">{{a.location}}</text></view>
+      <view class="row-line" wx:if="{{a.target}}"><text class="k">参加对象</text><text class="v">{{a.target}}</text></view>
+    </view>
+
+    <view class="a-summary" wx:if="{{a.summary}}">{{a.summary}}</view>
+
+    <view class="a-cover" wx:if="{{a.cover_url}}">
+      <image src="{{a.cover_url}}" mode="widthFix" />
+    </view>
+
+    <rich-text class="a-content" wx:if="{{contentIsHtml}}" nodes="{{a.content}}" />
+    <block wx:else>
+      <view class="a-p" wx:for="{{paragraphs}}" wx:key="index">{{item}}</view>
+    </block>
+
+    <view class="a-actions">
+      <button class="btn joined block" wx:if="{{enrolled}}" loading="{{acting}}" bindtap="doCancel">已报名 · 点击取消报名</button>
+      <button class="btn full block" wx:elif="{{full}}" disabled>名额已满</button>
+      <button class="btn primary block" wx:elif="{{a.status === 'open'}}" loading="{{acting}}" bindtap="doEnroll">立即报名</button>
+      <button class="btn disabled block" wx:else disabled>该活动当前不接受报名</button>
+      <view class="hint" style="text-align:center;margin-top:12rpx">
+        报名与取消都会写入后端数据库；未登录会先跳登录页。若你在小程序里未登录，请先到「我的」或登录页登录。
+      </view>
+    </view>
+  </block>
+</view>

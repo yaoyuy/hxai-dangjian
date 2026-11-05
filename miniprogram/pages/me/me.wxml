@@ -1,0 +1,110 @@
+<view class="page">
+
+  <!-- 头部：登录状态（后端身份说明原样展示） -->
+  <view class="me-head">
+    <view class="me-avatar">{{avatarText}}</view>
+    <view style="flex:1;min-width:0">
+      <view class="me-name">
+        <text>{{logged ? (user.real_name || user.username) : '未登录'}}</text>
+        <text class="me-chip" wx:if="{{logged && user.is_test_account}}">测试账号</text>
+      </view>
+      <view class="me-sub" wx:if="{{logged}}">{{user.branch || '未设置支部'}} · {{roleLabel || '党员'}}</view>
+      <view class="me-sub" wx:else>登录后查看我的党费与组织关系</view>
+    </view>
+  </view>
+
+  <!-- 后端身份原文案 -->
+  <view class="banner test-login">
+    <b>身份说明</b><text>{{notice || '（未读取到后端身份说明，请检查接口地址与网络）'}}</text>
+  </view>
+
+  <view class="banner" wx:if="{{logged}}">
+    <b>登录方式</b>
+    <text>{{loginMode === 'wechat' ? '微信身份' : '测试账号（非微信身份）'}}；{{hasOpenid ? '已绑定微信 openid' : '未绑定微信 openid'}}</text>
+  </view>
+
+  <!-- 未登录 -->
+  <block wx:if="{{!logged}}">
+    <view class="panel">
+      <view class="empty">还没有登录。登录后这里会显示后端返回的身份说明（当前登录方式由后端 /api/auth/config 决定）。</view>
+      <button class="btn primary block" bindtap="goLogin">去登录</button>
+    </view>
+  </block>
+
+  <!-- 已登录 -->
+  <block wx:else>
+    <view class="loading" wx:if="{{loading}}">正在加载我的数据…</view>
+
+    <!-- 我的党费 -->
+    <view class="sec-head"><text class="sec-title">我的党费</text>
+      <text class="sec-extra" wx:if="{{duesSummary}}">共 {{duesSummary.total}} 条记录</text>
+    </view>
+    <view class="panel" wx:if="{{duesSummary}}">
+      <view class="stat-grid">
+        <view class="stat"><b>{{duesSummary.paid + duesSummary.late}}</b><text>已缴（含补缴）</text></view>
+        <view class="stat"><b>{{duesSummary.unpaid}}</b><text>未缴</text></view>
+        <view class="stat"><b>¥{{duesSummary.amount_paid}}</b><text>已缴金额 / 应缴 ¥{{duesSummary.amount_total}}</text></view>
+        <view class="stat"><b>{{duesSummary.pay_rate}}%</b><text>缴费率</text></view>
+      </view>
+      <view class="hint" wx:if="{{duesSummary.formula}}">口径：{{duesSummary.formula}}</view>
+      <view class="row-line" wx:for="{{duesList}}" wx:key="id">
+        <text class="k">{{item.period}}</text>
+        <text class="v">
+          ¥{{item.amount_text}} · {{item.status_label}}<text wx:if="{{item.method}}"> · {{item.method}}</text>
+          <text wx:if="{{item.paid_at}}"> · {{item.paid_at}}</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}">测试数据</text>
+        </text>
+      </view>
+      <view class="empty" wx:if="{{!duesList.length}}">暂无党费记录（后端还没有为本人生成应缴记录）</view>
+    </view>
+    <view class="panel" wx:else><view class="empty">党费数据暂时读取不到，请稍后重试</view></view>
+
+    <!-- 我的组织关系 -->
+    <view class="sec-head">
+      <text class="sec-title">我的组织关系</text>
+      <text class="sec-extra" bindtap="toggleTransfer">{{showTransfer ? '收起申请' : '发起转接 ›'}}</text>
+    </view>
+
+    <view class="panel" wx:if="{{showTransfer}}">
+      <view class="field">
+        <view class="field-label">转接方向</view>
+        <picker range="{{directions}}" value="{{directionIndex}}" bindchange="onDirection">
+          <view class="field-picker">{{directions[directionIndex]}}</view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="field-label">转出单位</view>
+        <input class="field-input" placeholder="例如：某某学校某某学院党支部" value="{{form.from_org}}" bindinput="onFrom" />
+      </view>
+      <view class="field">
+        <view class="field-label">接收单位</view>
+        <input class="field-input" placeholder="例如：某某单位党支部" value="{{form.to_org}}" bindinput="onTo" />
+      </view>
+      <view class="field">
+        <view class="field-label">申请说明（可不填）</view>
+        <textarea class="field-textarea" placeholder="转接原因等" value="{{form.reason}}" bindinput="onReason" />
+      </view>
+      <view class="hint">同一时间只允许有一条待审核申请，重复提交后端会拒绝。</view>
+      <button class="btn primary block" style="margin-top:16rpx" loading="{{submitting}}" bindtap="submitTransfer">提交申请</button>
+    </view>
+
+    <view class="panel">
+      <view class="row-line" wx:for="{{transfers}}" wx:key="id">
+        <text class="k">{{item.direction_label}}</text>
+        <text class="v">
+          {{item.from_org || '—'}} → {{item.to_org || '—'}}
+          <text>　状态：{{item.status_label}}</text>
+          <text wx:if="{{item.apply_at}}">　申请：{{item.apply_at}}</text>
+          <text wx:if="{{item.review_note}}">　审核意见：{{item.review_note}}</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}">测试数据</text>
+        </text>
+      </view>
+      <view class="empty" wx:if="{{!transfers.length}}">暂无组织关系转接申请</view>
+    </view>
+
+    <view class="btn-row">
+      <button class="btn ghost" bindtap="doLogout">退出登录</button>
+    </view>
+    <view class="hint" style="text-align:center">退出只清除本机登录态，不影响后端数据。</view>
+  </block>
+</view>

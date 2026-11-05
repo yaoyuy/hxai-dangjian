@@ -1,0 +1,136 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}微信设置{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">微信设置</h1>
+<p class="ad-desc">
+  这些参数<b>存在数据库里</b>，在本页填写保存即生效，不用改代码、也不用改 .env（.env 在部分环境里受安全策略保护，改不动）。
+  取值优先级是：<b>本页填写的值 &gt; .env &gt; 代码默认值</b>。
+  第二阶段换成学校公众号时，只需要在这里把 AppID / AppSecret 重填一遍。
+</p>
+<p class="ad-desc">
+  <b>如实说明：</b>当前是个人未认证订阅号，<b>没有</b>网页授权、<b>没有</b>自定义菜单接口（推送菜单会返回 48001）、没有模板消息与支付权限。
+  下面的「测试连接」和「推送菜单」会调用真实微信接口并把原始错误显示出来，不会伪造成功结果。
+</p>
+
+<div class="ad-cards">
+  <div class="ad-card"><b>{{ public.wechat_source }}</b><span>公众号参数来源</span></div>
+  <div class="ad-card {{ 'warn' if not public.wechat_configured }}"><b>{{ '已配置' if public.wechat_configured else '未配置' }}</b><span>公众号 AppID / Secret</span></div>
+  <div class="ad-card {{ 'warn' if not public.wxapp_configured }}"><b>{{ '已配置' if public.wxapp_configured else '未配置' }}</b><span>小程序 AppID / Secret</span></div>
+  <div class="ad-card"><b>{{ public.login_mode_label }}</b><span>当前登录方式</span></div>
+  <div class="ad-card"><b>{{ whitelist_active }} / {{ whitelist_total }}</b><span>白名单已启用 / 总数</span></div>
+</div>
+
+<form method="post" action="{{ url_for('admin.wechat_save') }}">
+  <div class="ad-panel">
+    <h2>公众号（服务号 / 订阅号）</h2>
+    <p class="ad-desc">公众号后台「设置与开发 → 基本配置」里的 AppID、AppSecret；「服务器配置」里的 Token 与 EncodingAESKey。</p>
+    <div class="ad-form">
+      {% for item in groups.get('wechat', []) %}
+      <label>{{ item.label }}
+        {% if item.is_secret %}
+        <input type="password" name="{{ item.key }}" value="" autocomplete="new-password"
+               placeholder="{% if item.value %}已保存：{{ item.value }}（留空表示不修改）{% else %}未设置{% endif %}">
+        {% else %}
+        <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ad-panel">
+    <h2>小程序</h2>
+    <p class="ad-desc">
+      小程序是个人号也能走通的微信身份通道：小程序端 <code>wx.login()</code> 拿 code → 服务端换 openid，
+      不需要网页授权。本机没有小程序前端时，可以用「开发联调」方式手工提供 openid 测试登录逻辑（见登录页说明）。
+    </p>
+    <div class="ad-form">
+      {% for item in groups.get('wxapp', []) %}
+      <label>{{ item.label }}
+        {% if item.is_secret %}
+        <input type="password" name="{{ item.key }}" value="" autocomplete="new-password"
+               placeholder="{% if item.value %}已保存：{{ item.value }}（留空表示不修改）{% else %}未设置{% endif %}">
+        {% else %}
+        <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ad-panel">
+    <h2>登录方式与白名单</h2>
+    <div class="ad-form">
+      {% for item in groups.get('login', []) %}
+      <label>{{ item.label }}
+        {% if item.key == 'login_mode' %}
+        <select name="{{ item.key }}">
+          {% for k, n in login_modes.items() %}
+          <option value="{{ k }}" {{ 'selected' if item.value == k }}>{{ n }}</option>
+          {% endfor %}
+        </select>
+        {% elif item.key == 'whitelist_enabled' %}
+        <select name="{{ item.key }}">
+          <option value="1" {{ 'selected' if item.value in ('1', 'true', 'yes') }}>启用（只允许名单内的微信登录）</option>
+          <option value="0" {{ 'selected' if item.value in ('0', 'false', 'no', '') }}>关闭（任何微信都能登录，仅建议临时测试）</option>
+        </select>
+        {% elif item.key == 'oauth_scope' %}
+        <select name="{{ item.key }}">
+          <option value="snsapi_base" {{ 'selected' if item.value == 'snsapi_base' }}>snsapi_base（静默，只拿 openid）</option>
+          <option value="snsapi_userinfo" {{ 'selected' if item.value == 'snsapi_userinfo' }}>snsapi_userinfo（弹授权页，可拿昵称头像）</option>
+        </select>
+        {% else %}
+        <input type="text" name="{{ item.key }}" value="{{ item.value }}">
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+    <p><a class="ad-btn ghost" href="{{ url_for('admin.whitelist') }}">去管理微信登录白名单</a></p>
+  </div>
+
+  <div class="ad-panel">
+    <h2>首页公告</h2>
+    <div class="ad-form">
+      {% for item in groups.get('site', []) %}
+      <label>{{ item.label }}<input type="text" name="{{ item.key }}" value="{{ item.value }}"></label>
+      {% endfor %}
+    </div>
+    <p class="ad-ops"><button class="ad-btn" type="submit">保存全部设置</button>
+      <span class="ad-desc">密文字段留空 = 保持原来的值不变。</span></p>
+  </div>
+</form>
+
+<div class="ad-panel">
+  <h2>服务器地址（微信回调 / 菜单链接用）</h2>
+  <table class="ad-table">
+    <tbody>
+      <tr><th>公网地址（PUBLIC_BASE_URL）</th><td>{{ public.public_base_url or '（未配置，隧道或 .env 里都没读到）' }}</td></tr>
+      <tr><th>公众号服务器配置 URL</th><td>{{ server_url }}</td></tr>
+      <tr><th>网页授权回调地址</th><td>{{ oauth_redirect or '（需要先配置公网地址）' }}</td></tr>
+      <tr><th>网页授权跳转链接</th><td style="word-break:break-all">{{ public.oauth_url or '（需要先填公众号 AppID）' }}</td></tr>
+    </tbody>
+  </table>
+  <p class="ad-desc">
+    个人订阅号不能配置网页授权域名与业务域名，所以上面两个「回调」在个人号上用不了，页面如实标注；第二阶段换学校已认证号后可直接使用。
+  </p>
+</div>
+
+<div class="ad-panel">
+  <h2>连接测试与菜单推送</h2>
+  <div class="ad-ops">
+    <form method="post" action="{{ url_for('admin.wechat_test') }}" class="ad-inline">
+      <button class="ad-btn ghost" type="submit">测试公众号 / 小程序参数</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.wechat_menu_push') }}" class="ad-inline"
+          onsubmit="return confirm('用接口推送自定义菜单？未认证个人订阅号会返回 48001 且不生效。');">
+      <button class="ad-btn ghost" type="submit">用接口推送自定义菜单</button>
+    </form>
+  </div>
+  <p class="ad-desc">
+    个人订阅号推送菜单必然失败（48001 api unauthorized），这是微信的权限限制，不是代码问题——菜单已在公众号后台手工配置。
+    换到学校已认证公众号后，同一个按钮会真正生效，菜单里的链接也会直接指向本系统页面。
+  </p>
+</div>
+
+{% endblock %}

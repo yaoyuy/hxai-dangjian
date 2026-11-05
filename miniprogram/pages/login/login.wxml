@@ -1,0 +1,46 @@
+<view class="page">
+
+  <!-- 登录方式由后台「微信设置」决定，这里显示后端原文案 -->
+  <view class="banner test-login" wx:if="{{notice}}">
+    <b>身份说明</b><text>{{notice}}</text>
+  </view>
+  <view class="page-title">登录智慧党建</view>
+  <view class="page-sub" wx:if="{{cfg && cfg.login_mode_label}}">当前登录方式（来自后端）：{{cfg.login_mode_label}}</view>
+
+  <view class="banner" wx:if="{{errMsg}}"><b>提示</b><text>{{errMsg}}</text></view>
+
+  <!-- 测试账号登录 -->
+  <view class="form" wx:if="{{!cfg || cfg.test_login_allowed}}">
+    <view class="sec-title" style="margin-bottom:16rpx">测试账号登录</view>
+    <view class="field">
+      <view class="field-label">账号</view>
+      <input class="field-input" placeholder="请输入账号" value="{{username}}" bindinput="onUser" />
+    </view>
+    <view class="field">
+      <view class="field-label">密码</view>
+      <input class="field-input" password placeholder="请输入密码" value="{{password}}" bindinput="onPwd" />
+    </view>
+    <view class="hint">默认测试账号见后端 README.md 的「默认测试账号」一节（管理员 1 个、普通党员若干）。</view>
+    <button class="btn primary block" style="margin-top:24rpx" loading="{{loading}}" bindtap="doTestLogin">登录</button>
+  </view>
+  <view class="banner" wx:else>
+    <b>提示</b><text>后端当前登录方式为「{{cfg.login_mode_label}}」，测试账号已关闭；请用微信登录，或在后台把登录方式改回 test / both。</text>
+  </view>
+
+  <!-- 微信一键登录 -->
+  <view class="form" style="margin-top:24rpx">
+    <view class="sec-title" style="margin-bottom:16rpx">微信一键登录</view>
+    <view class="hint">
+      点击后调用 wx.login 拿临时 code，再用 POST /api/auth/wechat-login 交给后端换成 openid 并匹配账号。
+      后端会按白名单校验：不在白名单内会被拒绝，页面会如实显示后端返回的原因，不会伪造身份。
+    </view>
+    <view class="hint" wx:if="{{cfg}}">
+      小程序 AppID：{{cfg.wxapp_appid || '后台未配置'}}；微信登录开关：{{cfg.wechat_login_allowed ? '已开放' : '未开放'}}；白名单：{{cfg.whitelist_enabled ? '启用' : '关闭'}}
+    </view>
+    <button class="btn ghost block" style="margin-top:20rpx" loading="{{loading}}" bindtap="doWechatLogin">微信一键登录</button>
+  </view>
+
+  <view class="hint" style="text-align:center;margin-top:24rpx">
+    开发者工具需勾选「详情 → 本地设置 → 不校验合法域名」才能连上 http 接口地址。
+  </view>
+</view>

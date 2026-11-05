@@ -1,0 +1,2 @@
+/* 首页：全局样式已覆盖大部分，这里只放首页特有的微调 */
+.hero-title { letter-spacing: 2rpx; }

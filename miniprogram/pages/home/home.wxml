@@ -1,0 +1,88 @@
+<view class="page has-tabbar">
+
+  <!-- 顶部宣传图占位（没有宣传图资源时用渐变横幅，不引用不存在的图片） -->
+  <view class="hero">
+    <view class="hero-badge">宣传图占位</view>
+    <view class="hero-title">{{heroTitle}}</view>
+    <view class="hero-desc">{{heroDesc}}</view>
+    <view class="hero-meta">可在后台换上支部自己的宣传图</view>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="searchbar">
+    <text class="searchbar-ico">搜</text>
+    <input class="searchbar-input" placeholder="搜索学习文章（标题或摘要）" confirm-type="search"
+           value="{{keyword}}" bindinput="onSearchInput" bindconfirm="doSearch" />
+    <text style="color:#b01e23;font-size:26rpx" bindtap="doSearch">搜索</text>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick">
+    <view class="qitem" data-url="/pages/study/study" bindtap="goPage">
+      <view class="qicon">学</view><text class="qtext">党建学习</text>
+    </view>
+    <view class="qitem" data-url="/pages/meetings/meetings" bindtap="goPage">
+      <view class="qicon">会</view><text class="qtext">三会一课</text>
+    </view>
+    <view class="qitem" data-url="/pages/activities/activities" bindtap="goPage">
+      <view class="qicon">报</view><text class="qtext">活动报名</text>
+    </view>
+    <view class="qitem" data-url="/pages/ledger/ledger" bindtap="goPage">
+      <view class="qicon">台</view><text class="qtext">电子台账</text>
+    </view>
+    <view class="qitem" data-url="/pages/gallery/gallery" bindtap="goPage">
+      <view class="qicon">采</view><text class="qtext">党建风采</text>
+    </view>
+    <view class="qitem" data-url="/pages/dashboard/dashboard" bindtap="goPage">
+      <view class="qicon">数</view><text class="qtext">数据看板</text>
+    </view>
+  </view>
+
+  <!-- 最近文章 -->
+  <view class="sec-head">
+    <text class="sec-title">最近学习内容</text>
+    <text class="sec-extra" data-url="/pages/study/study" bindtap="goPage">查看全部 ›</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <!-- 头条：有封面图用图，没有用渐变占位 -->
+    <view class="push" wx:if="{{first}}" data-id="{{first.id}}" bindtap="goArticle">
+      <view class="push-cover">
+        <image class="push-img" wx:if="{{first.cover_url}}" src="{{first.cover_url}}" mode="aspectFill" />
+        <view class="push-ph" wx:else>党建学习</view>
+      </view>
+      <view class="push-body">
+        <view class="push-title">{{first.title}}</view>
+        <view class="push-sum">{{first.summary}}</view>
+        <view class="push-foot">
+          <text class="tag" wx:if="{{first.category}}">{{first.category}}</text>
+          <text class="demo-tag" wx:if="{{first.is_demo}}">测试数据</text>
+          <text class="spacer" style="flex:1"></text>
+          <text>{{first.published_at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="acard" wx:for="{{rest}}" wx:key="id" data-id="{{item.id}}" bindtap="goArticle">
+      <view class="acard-thumb">
+        <image class="acard-img" wx:if="{{item.cover_url}}" src="{{item.cover_url}}" mode="aspectFill" />
+        <view class="thumb-ph" wx:else>党建</view>
+      </view>
+      <view class="acard-body">
+        <view class="acard-title">{{item.title}}</view>
+        <view class="acard-sum">{{item.summary}}</view>
+        <view class="acard-meta">
+          <text class="tag" wx:if="{{item.category}}">{{item.category}}</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}">测试数据</text>
+          <text class="spacer"></text>
+          <text>{{item.published_at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!first}}">暂无已发布的学习文章</view>
+  </block>
+</view>

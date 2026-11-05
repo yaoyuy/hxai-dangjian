@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block navtitle %}{{ code }}{% endblock %}
+{% block content %}
+<div class="page" style="padding:60px 24px;text-align:center">
+  <div style="font-size:52px;color:#b01e23;font-weight:700">{{ code }}</div>
+  <div style="color:#666;margin-top:10px;font-size:15px">{{ message }}</div>
+  <a class="btn" style="margin-top:24px" href="{{ url_for('pages.index') }}">返回首页</a>
+</div>
+{% endblock %}

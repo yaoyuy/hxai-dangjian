@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{% block title %}后台管理{% endblock %} · {{ config.SITE_NAME }}</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-body">
+
+<header class="ad-top">
+  <div class="ad-brand">
+    <span class="ad-logo">HX</span>
+    <div>
+      <b>智慧党建 · 后台管理</b>
+      <small>{{ config.BRANCH_NAME }}　当前账号：{{ current_user.real_name or current_user.username }}
+        （{{ current_user.role }}）</small>
+    </div>
+  </div>
+  <nav class="ad-links">
+    <a href="{{ url_for('pages.index') }}" target="_blank">查看前台</a>
+    <a href="{{ url_for('pages.me') }}">我的</a>
+    <a href="{{ url_for('pages.logout') }}" class="ad-out">退出</a>
+  </nav>
+</header>
+
+<nav class="ad-nav">
+  <a href="{{ url_for('admin.index') }}" class="{{ 'on' if request.endpoint == 'admin.index' }}">概览</a>
+  <a href="{{ url_for('admin.articles') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.article') }}">文章</a>
+  <a href="{{ url_for('admin.activities') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.activity') }}">活动</a>
+  <a href="{{ url_for('admin.users') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.user') }}">党员</a>
+  <a href="{{ url_for('admin.dues') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.dues') }}">党费</a>
+  <a href="{{ url_for('admin.transfers') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.transfer') }}">转接</a>
+  <a href="{{ url_for('admin.whitelist') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.whitelist') }}">白名单</a>
+  <a href="{{ url_for('admin.wechat_settings') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.wechat') }}">微信</a>
+  <a href="{{ url_for('admin.gallery') }}" class="{{ 'on' if request.endpoint and request.endpoint.startswith('admin.gallery') }}">风采</a>
+  <a href="{{ url_for('pages.ledger') }}" target="_blank">台账（前台上传）</a>
+</nav>
+
+<div class="ad-wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+      <div class="ad-flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

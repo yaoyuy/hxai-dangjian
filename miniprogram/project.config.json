@@ -1,0 +1,44 @@
+{
+  "description": "HXAI云 · 智慧党建 微信小程序（原生 WXML/WXSS/JS，不用框架、不用 npm、不用 Node 构建）。appid 现为 touristappid —— 这是微信开发者工具在导入项目时自动生成的**测试号**（2026-10-25 实测可用，能连本机后端、能生成真机预览码）；正式使用前请到微信公众平台注册小程序，把下面 appid 换成真实 AppID。另需在开发者工具「详情 → 本地设置」勾选「不校验合法域名…」，否则连不上 config.js 里的 http 地址。",
+  "appid": "touristappid",
+  "projectname": "hxai-dangjian",
+  "miniprogramRoot": "./",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "useCompilerPlugins": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

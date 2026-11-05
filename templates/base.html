@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="referrer" content="no-referrer">
+<title>{% block title %}{{ config.SITE_NAME }}{% endblock %}</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="app">
+
+  {# ---------- 微信风格标题栏 ---------- #}
+  <div class="wxnav">
+    <button class="back" id="navBack" aria-label="返回">‹</button>
+    <div class="ntitle">{% block navtitle %}{{ config.SITE_NAME }}{% endblock %}</div>
+    <div class="dots" aria-hidden="true"><i></i><em></em><i></i></div>
+  </div>
+
+  {# ---------- 测试环境提示（真实状态，不伪装） ---------- #}
+  {% if show_test_login_banner %}
+  <div class="banner test-login">
+    <b>测试登录</b><span>当前身份为本地测试账号，<b>非微信身份</b>，未获取微信 openid。</span>
+  </div>
+  {% endif %}
+  {% if config.SHOW_DEMO_BADGE and demo_data_exists %}
+  <div class="banner">
+    <b>测试数据</b><span>页面中标注「测试数据」的内容为初始化样例，可删除后录入真实资料。</span>
+  </div>
+  {% endif %}
+
+  <div class="scroll">
+    {% block content %}{% endblock %}
+  </div>
+
+  {# ---------- 底部自定义菜单 ---------- #}
+  <div class="menubar" id="menubar"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.__APP__ = {
+    siteName: {{ config.SITE_NAME|tojson }},
+    branchName: {{ config.BRANCH_NAME|tojson }},
+    loginMode: {{ config.LOGIN_MODE|tojson }},
+    category: {{ (request.args.get('category') or 'all')|tojson }},
+    page: {{ (request.endpoint or '')|tojson }},
+    loggedIn: {{ (current_user is not none)|tojson }},
+    isAdmin: {{ (current_user is not none and current_user.is_admin)|tojson }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

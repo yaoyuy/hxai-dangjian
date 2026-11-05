@@ -1,0 +1,64 @@
+<view class="page has-tabbar">
+  <view class="page-title">组织生活</view>
+  <view class="page-sub">三会一课、活动报名与电子台账都在这里，数据来自后端真实接口。</view>
+
+  <!-- 顶部数字：来自 /api/stats/overview，不写死 -->
+  <view class="panel" wx:if="{{ov}}">
+    <view class="stat-grid">
+      <view class="stat"><b>{{ov.total_members}}</b><text>党员总数</text></view>
+      <view class="stat"><b>{{ov.year_activities}}</b><text>{{ov.year}} 年活动</text></view>
+      <view class="stat"><b>{{ov.total_enrollments}}</b><text>报名人次</text></view>
+      <view class="stat"><b>{{ov.total_files}}</b><text>台账文件</text></view>
+    </view>
+  </view>
+
+  <view class="sec-head"><text class="sec-title">功能入口</text></view>
+
+  <view class="big-entry" data-url="/pages/meetings/meetings" bindtap="go">
+    <view class="bi-ico">会</view>
+    <view class="bi-body">
+      <view class="bi-title">三会一课</view>
+      <view class="bi-sub">支委会、党员大会、党小组会与党课安排</view>
+    </view>
+    <view class="bi-arrow">›</view>
+  </view>
+
+  <view class="big-entry" data-url="/pages/activities/activities" bindtap="go">
+    <view class="bi-ico">报</view>
+    <view class="bi-body">
+      <view class="bi-title">活动报名</view>
+      <view class="bi-sub">主题党日、志愿服务、集中学习报名与取消</view>
+    </view>
+    <view class="bi-arrow">›</view>
+  </view>
+
+  <view class="big-entry" data-url="/pages/ledger/ledger" bindtap="go">
+    <view class="bi-ico">档</view>
+    <view class="bi-body">
+      <view class="bi-title">电子台账</view>
+      <view class="bi-sub">会议记录、活动资料、学习材料、制度文件</view>
+    </view>
+    <view class="bi-arrow">›</view>
+  </view>
+
+  <view class="sec-head">
+    <text class="sec-title">最近活动</text>
+    <text class="sec-extra">最新 3 条</text>
+  </view>
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <block wx:else>
+    <view class="acard" wx:for="{{recent}}" wx:key="id" data-id="{{item.id}}"
+          data-url="/pages/activity/activity?id={{item.id}}" bindtap="go">
+      <view class="acard-body">
+        <view class="acard-title">{{item.title}}</view>
+        <view class="acard-meta">
+          <text class="tag">{{item.kind_label || item.kind}}</text>
+          <text class="chip-status {{item.status === 'open' ? 'done' : 'todo'}}">{{item.statusText}}</text>
+          <text class="spacer"></text>
+          <text>{{item.start_at}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{!recent.length}}">暂无活动安排</view>
+  </block>
+</view>

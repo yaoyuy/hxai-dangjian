@@ -1,0 +1,108 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}党费管理{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">党费管理</h1>
+<p class="ad-desc">
+  一人一个期间（YYYY-MM）一条记录，金额与状态全部存在数据库里；前台「我的」页与数据看板都从这里实时统计。
+  批量生成只是把每个人的应缴记录建出来，<b>不会自动标记为已缴</b>，收款后再手工点「标记已缴」。
+</p>
+
+<div class="ad-cards">
+  <div class="ad-card"><b>{{ period_summary.total }}</b><span>{{ period }} 应缴人数</span></div>
+  <div class="ad-card"><b>{{ period_summary.paid + period_summary.late }}</b><span>{{ period }} 已缴 / 补缴</span></div>
+  <div class="ad-card warn"><b>{{ period_summary.unpaid }}</b><span>{{ period }} 未缴</span></div>
+  <div class="ad-card"><b>{{ '%.0f'|format(period_summary.pay_rate) }}%</b><span>{{ period }} 缴费率</span></div>
+  <div class="ad-card"><b>{{ '%.2f'|format(period_summary.amount_paid) }}</b><span>{{ period }} 已收金额（元）</span></div>
+  <div class="ad-card"><b>{{ '%.2f'|format(summary.amount_unpaid) }}</b><span>全部未收金额（元）</span></div>
+</div>
+
+<div class="ad-panel">
+  <form method="get" action="{{ url_for('admin.dues') }}" class="ad-inline">
+    <label>查看期间
+      <select name="period" onchange="this.form.submit()">
+        {% for p in periods %}<option value="{{ p }}" {{ 'selected' if p == period }}>{{ p }}</option>{% endfor %}
+        {% if period not in periods %}<option value="{{ period }}" selected>{{ period }}（暂无记录）</option>{% endif %}
+      </select>
+    </label>
+    <noscript><button class="ad-btn small" type="submit">查看</button></noscript>
+  </form>
+</div>
+
+<div class="ad-panel">
+  <h2>批量生成应缴记录</h2>
+  <p class="ad-desc">按期间给<b>全部账号</b>生成一条应缴记录；同一人同一期间已存在会自动跳过，重复点不会产生重复数据。</p>
+  <form method="post" action="{{ url_for('admin.dues_generate') }}" class="ad-form">
+    <label>期间<input type="text" name="period" value="{{ period }}" placeholder="YYYY-MM" required></label>
+    <label>每人金额（元）<input type="text" name="amount" value="10" required></label>
+    <button class="ad-btn" type="submit">生成 {{ period }} 应缴</button>
+  </form>
+</div>
+
+<details class="ad-panel">
+  <summary><b>＋ 手工登记一条党费</b></summary>
+  <form method="post" action="{{ url_for('admin.dues_create') }}" class="ad-form">
+    <label>党员
+      <select name="user_id" required>
+        {% for u in members %}<option value="{{ u.id }}">{{ u.real_name or u.username }}（{{ u.username }}）</option>{% endfor %}
+      </select>
+    </label>
+    <label>期间<input type="text" name="period" value="{{ period }}" placeholder="YYYY-MM" required></label>
+    <label>金额（元）<input type="text" name="amount" value="10" required></label>
+    <label>缴纳方式
+      <select name="method">{% for m in methods %}<option value="{{ m }}">{{ m }}</option>{% endfor %}</select>
+    </label>
+    <label>状态
+      <select name="status">
+        {% for k, n in status_labels.items() %}<option value="{{ k }}" {{ 'selected' if k == 'paid' }}>{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>备注<input type="text" name="note" placeholder="如：10 月补缴"></label>
+    <button class="ad-btn" type="submit">添加记录</button>
+  </form>
+</details>
+
+<div class="ad-panel">
+  <h2>{{ period }} 明细</h2>
+  <table class="ad-table">
+    <thead><tr><th>党员</th><th>金额（元）</th><th>方式</th><th>状态</th><th>缴纳时间</th><th>备注</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for d in rows %}
+      <tr>
+        <td>{{ d.user.real_name or d.user.username if d.user else '—' }}{% if d.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}</td>
+        <td>{{ '%.2f'|format(d.amount_float) }}</td>
+        <td>{{ d.method }}</td>
+        <td>
+          {% if d.status == 'paid' %}<span class="ad-tag ok">已缴</span>
+          {% elif d.status == 'late' %}<span class="ad-tag warn">补缴</span>
+          {% else %}<span class="ad-tag warn">未缴</span>{% endif %}
+        </td>
+        <td>{{ d.paid_at.strftime('%Y-%m-%d') if d.paid_at else '—' }}</td>
+        <td>{{ d.note or '—' }}</td>
+        <td>
+          <div class="ad-ops">
+            <form method="post" action="{{ url_for('admin.dues_status', due_id=d.id) }}" class="ad-inline">
+              {% if d.status == 'unpaid' %}
+              <input type="hidden" name="status" value="paid">
+              <button class="ad-btn small" type="submit">标记已缴</button>
+              {% else %}
+              <input type="hidden" name="status" value="unpaid">
+              <button class="ad-btn small ghost" type="submit">改回未缴</button>
+              {% endif %}
+            </form>
+            <form method="post" action="{{ url_for('admin.dues_delete', due_id=d.id) }}" class="ad-inline"
+                  onsubmit="return confirm('删除这条党费记录？');">
+              <button class="ad-btn small danger" type="submit">删除</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="ad-empty">{{ period }} 还没有党费记录，可以用上面的「批量生成」或「手工登记」。</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="ad-desc">全部期间汇总：共 {{ summary.total }} 条，已缴 {{ summary.paid }}，补缴 {{ summary.late }}，未缴 {{ summary.unpaid }}，缴费率 {{ '%.0f'|format(summary.pay_rate) }}%。</p>
+</div>
+
+{% endblock %}

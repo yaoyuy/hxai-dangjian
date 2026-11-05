@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="crumb">组织生活 › <text>活动报名</text></view>
+  <view class="page-title">活动报名</view>
+  <view class="page-sub">主题党日、志愿服务、集中学习等活动，点开可报名或取消报名。</view>
+
+  <scroll-view class="chips" scroll-x="true">
+    <view class="chip {{kind === item.value ? 'on' : ''}}"
+          wx:for="{{kinds}}" wx:key="value"
+          data-value="{{item.value}}" bindtap="pickKind">{{item.name}}</view>
+  </scroll-view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <view class="acard" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="acard-body">
+        <view class="acard-title">{{item.title}}</view>
+        <view class="acard-sum">{{item.summary}}</view>
+        <view class="acard-meta" style="flex-wrap:wrap">
+          <text class="tag">{{item.kindText}}</text>
+          <text class="chip-status {{item.status === 'open' ? 'done' : 'todo'}}">{{item.statusText}}</text>
+          <text class="chip-status done" wx:if="{{item.enrolled}}">已报名</text>
+          <text class="chip-status todo" wx:if="{{item.full}}">名额已满</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}">测试数据</text>
+        </view>
+        <view class="frow-meta">
+          <text wx:if="{{item.start_at}}">{{item.start_at}}</text>
+          <text wx:if="{{item.location}}">　{{item.location}}</text>
+        </view>
+        <view class="frow-meta">
+          <text>已报名 {{item.enrolled_count}} 人</text>
+          <text wx:if="{{item.capacity}}"> / {{item.capacity}}</text>
+          <text wx:else>（不限人数）</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!list.length}}">当前筛选下暂无活动</view>
+  </block>
+</view>

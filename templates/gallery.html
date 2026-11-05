@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block navtitle %}党建风采{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">支部风采 › <b>党建风采</b></div>
+  <div class="sec-head"><h2>党建风采</h2><span>{{ photos|length }} 张</span></div>
+
+  <div class="gal">
+    {% for p in photos %}
+    <figure class="{{ 'wide' if loop.first else '' }}">
+      {% if p.image_url %}
+      <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy">
+      {% else %}
+      <div style="aspect-ratio:1.25/1;background:linear-gradient(135deg,#c2242a,#8c1418);
+                  display:grid;place-items:center;color:#f6d98a;font-size:14px">{{ p.title }}</div>
+      {% endif %}
+      <figcaption>{{ p.title }}<small>{{ p.description }} · {{ p.created_at.strftime('%Y-%m-%d') }}</small></figcaption>
+    </figure>
+    {% else %}
+    <div class="empty on" style="grid-column:1/-1">暂无风采图片</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

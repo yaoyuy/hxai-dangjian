@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/study/study",
+    "pages/article/article",
+    "pages/meetings/meetings",
+    "pages/activities/activities",
+    "pages/activity/activity",
+    "pages/ledger/ledger",
+    "pages/gallery/gallery",
+    "pages/dashboard/dashboard",
+    "pages/me/me",
+    "pages/login/login",
+    "pages/org/org",
+    "pages/style/style"
+  ],
+  "window": {
+    "navigationBarTitleText": "HXAI云 · 智慧党建",
+    "navigationBarBackgroundColor": "#b01e23",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f7f7f7",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#888888",
+    "selectedColor": "#b01e23",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/study/study", "text": "党建学习" },
+      { "pagePath": "pages/org/org", "text": "组织生活" },
+      { "pagePath": "pages/style/style", "text": "支部风采" }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,38 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}党建风采{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">党建风采</h1>
+<p class="ad-desc">前台「支部风采」展示的图片。图片地址填可访问的 URL；第二阶段可改为直接上传到服务器目录。</p>
+
+<details class="ad-panel" open>
+  <summary><b>＋ 添加图片</b></summary>
+  <form method="post" action="{{ url_for('admin.gallery_create') }}" class="ad-form">
+    <label>标题<input type="text" name="title" required maxlength="60"></label>
+    <label>图片地址<input type="text" name="image_url" placeholder="https://… 或 /static/img/xxx.jpg"></label>
+    <label>说明<textarea name="description" rows="2"></textarea></label>
+    <button class="ad-btn" type="submit">添加</button>
+  </form>
+</details>
+
+<div class="ad-panel">
+  <div class="ad-gallery">
+    {% for p in photos %}
+    <figure>
+      {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.title }}">{% else %}<div class="ph">{{ p.title }}</div>{% endif %}
+      <figcaption>
+        {{ p.title }}{% if p.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}
+        <small>{{ p.description or '' }}</small>
+      </figcaption>
+      <form method="post" action="{{ url_for('admin.gallery_delete', photo_id=p.id) }}"
+            onsubmit="return confirm('确定删除这张图片？');">
+        <button class="ad-link danger" type="submit">删除</button>
+      </form>
+    </figure>
+    {% else %}
+    <p class="ad-empty">还没有图片</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

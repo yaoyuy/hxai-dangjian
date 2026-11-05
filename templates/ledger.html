@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block navtitle %}电子台账{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">组织生活 › <b>电子台账</b></div>
+  <div class="sec-head">
+    <h2>电子台账</h2>
+    <span id="ledgerTotal">—</span>
+  </div>
+
+  <div class="lsearch">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.4">
+      <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/>
+    </svg>
+    <input id="ledgerSearch" type="search" placeholder="搜文件名，如：纪要 / 计划 / 名单">
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-cat="all">全部</button>
+    {% for c in categories %}
+    <button class="tab" data-cat="{{ c.name }}">{{ c.name }}</button>
+    {% endfor %}
+  </div>
+
+  <div style="padding-top:12px" id="ledgerList"></div>
+
+  {% if current_user and current_user.is_admin %}
+  <div class="panel" style="margin-top:12px">
+    <h3>上传台账（管理员）</h3>
+    <div class="sub">支持 {{ config.ALLOWED_UPLOAD_EXT | join(' / ') }}，单个文件不超过 {{ (config.MAX_CONTENT_LENGTH / 1024 / 1024) | round | int }} MB</div>
+    <form id="uploadForm">
+      <div class="field"><label>文件标题</label><input name="title" placeholder="不填则用文件名"></div>
+      <div class="field"><label>分类</label>
+        <select name="category">
+          {% for c in categories %}<option value="{{ c.name }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field"><label>选择文件</label><input type="file" name="file" required></div>
+      <button class="btn" id="uploadBtn" type="submit">上传并入库</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

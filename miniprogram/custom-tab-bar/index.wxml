@@ -1,0 +1,33 @@
+<!-- 自定义 tabBar：底部一条 + 上方弹出的子菜单浮层 -->
+<view class="ctb">
+  <!-- 子菜单浮层 -->
+  <view class="ctb-mask" wx:if="{{current}}" bindtap="closeMenu"></view>
+  <block wx:for="{{menus}}" wx:key="key">
+    <view class="ctb-panel" wx:if="{{current === item.key}}">
+      <view class="ctb-panel-head" data-url="{{item.page}}" bindtap="goItem">
+        <text>{{item.name}}总览</text>
+        <text class="ctb-arrow">›</text>
+      </view>
+      <view class="ctb-panel-tip">选择要进入的栏目</view>
+      <view class="ctb-subitem" wx:for="{{item.items}}" wx:for-item="it" wx:key="name"
+            data-url="{{it.url}}" data-category="{{it.category}}" bindtap="goItem">
+        <text>{{it.name}}</text>
+        <text class="ctb-arrow">›</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部主条 -->
+  <view class="ctb-bar">
+    <view class="ctb-home {{selected === 0 ? 'on' : ''}}" bindtap="goHome">
+      <view class="ctb-home-ico">首</view>
+      <text class="ctb-home-txt">首页</text>
+    </view>
+    <view class="ctb-main {{selected === item_idx + 1 ? 'on' : ''}}"
+          wx:for="{{menus}}" wx:for-item="item" wx:for-index="item_idx" wx:key="key"
+          data-key="{{item.key}}" bindtap="toggleMenu">
+      <text class="ctb-main-txt">{{item.name}}</text>
+      <text class="ctb-caret">{{current === item.key ? '▾' : '▴'}}</text>
+    </view>
+  </view>
+</view>

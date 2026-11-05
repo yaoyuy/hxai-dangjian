@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block navtitle %}活动报名{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">组织生活 › <b>活动报名</b></div>
+  <div class="sec-head">
+    <h2>活动报名</h2>
+    <span id="actCount">—</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-group="kind" data-val="all">全部</button>
+    <button class="tab" data-group="kind" data-val="party_day">主题党日</button>
+    <button class="tab" data-group="kind" data-val="volunteer">志愿服务</button>
+    <button class="tab" data-group="kind" data-val="meeting">会议</button>
+  </div>
+
+  <div id="actList" style="padding-top:12px"></div>
+</div>
+{% endblock %}

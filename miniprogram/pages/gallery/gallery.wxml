@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="crumb">支部风采 › <text>党建风采</text></view>
+  <view class="page-title">党建风采</view>
+  <view class="page-sub">支部活动照片墙（数据来自后端 /gallery 页面）。</view>
+
+  <view class="banner">
+    <b>说明</b>
+    <text>后端暂未提供风采 JSON 接口，本页解析的是服务端渲染的 /gallery 页面；照片标题与日期均来自后端。</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <view class="gal">
+      <view class="gitem {{item.wide ? 'wide' : ''}}" wx:for="{{list}}" wx:key="id">
+        <image class="gimg" wx:if="{{item.img}}" src="{{item.img}}" mode="aspectFill" />
+        <view class="gph" wx:else>{{item.title}}</view>
+        <view class="gcap">
+          <view class="gtitle">{{item.title}}</view>
+          <view class="gsub" wx:if="{{item.sub}}">{{item.sub}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{!list.length}}">暂无风采图片</view>
+  </block>
+</view>

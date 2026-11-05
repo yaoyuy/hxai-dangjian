@@ -1,0 +1,63 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}组织关系转接{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">组织关系转接</h1>
+<p class="ad-desc">
+  党员在前台「我的」页提交转入 / 转出申请，状态先记为<b>待审核</b>，管理员在这里审核通过或驳回，审核结果前台可见。
+  当前待审核 <b>{{ pending }}</b> 条。
+</p>
+
+<div class="ad-panel">
+  <table class="ad-table">
+    <thead>
+      <tr><th>党员</th><th>方向</th><th>原单位 / 支部</th><th>目标单位 / 支部</th><th>原因</th><th>状态</th><th>申请时间</th><th>审核</th></tr>
+    </thead>
+    <tbody>
+    {% for t in rows %}
+      <tr>
+        <td>{{ t.user.real_name or t.user.username if t.user else '—' }}{% if t.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}</td>
+        <td>{{ t.direction_label }}</td>
+        <td>{{ t.from_org or '—' }}</td>
+        <td>{{ t.to_org or '—' }}</td>
+        <td>{{ t.reason or '—' }}</td>
+        <td>
+          {% if t.status == 'approved' %}<span class="ad-tag ok">已通过</span>
+          {% elif t.status == 'rejected' %}<span class="ad-tag warn">已驳回</span>
+          {% else %}<span class="ad-tag warn">待审核</span>{% endif %}
+          {% if t.review_note %}<div class="ad-desc">审核意见：{{ t.review_note }}</div>{% endif %}
+        </td>
+        <td>{{ t.apply_at.strftime('%Y-%m-%d %H:%M') if t.apply_at else '—' }}
+          {% if t.review_at %}<div class="ad-desc">审核 {{ t.review_at.strftime('%Y-%m-%d') }}</div>{% endif %}
+        </td>
+        <td>
+          {% if t.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin.transfer_review', transfer_id=t.id) }}" class="ad-inline">
+            <input type="text" name="review_note" placeholder="审核意见（可选）" style="width:140px">
+            <button class="ad-btn small" type="submit" name="action" value="approve">通过</button>
+            <button class="ad-btn small ghost" type="submit" name="action" value="reject">驳回</button>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('admin.transfer_delete', transfer_id=t.id) }}" class="ad-inline"
+                onsubmit="return confirm('删除这条转接记录？');">
+            <button class="ad-btn small danger" type="submit">删除</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="8" class="ad-empty">还没有转接申请。党员在前台「我的」页可以自己提交。</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="ad-panel">
+  <h2>说明</h2>
+  <p class="ad-desc">
+    第一阶段按<b>单支部</b>设计，转接只记录原单位 / 目标单位文字与审核状态，不自动改动支部归属，
+    避免误操作。第二阶段扩展成多支部后，可以在审核通过时自动把党员挂到目标支部。
+  </p>
+</div>
+
+{% endblock %}

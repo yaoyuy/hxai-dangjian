@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block navtitle %}学习专栏{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">党建学习 › <b>学习专栏</b></div>
+  <div class="sec-head">
+    <h2>学习专栏</h2>
+    <span id="studyCount">—</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab {% if not request.args.get('category') %}on{% endif %}" data-cat="all">全部</button>
+    {% for c in categories %}
+    <button class="tab {% if request.args.get('category') == c.code %}on{% endif %}" data-cat="{{ c.code }}">{{ c.name }}</button>
+    {% endfor %}
+  </div>
+
+  <div style="padding:10px 16px 0">
+    <div class="lsearch" style="margin:0">
+      <input id="studySearch" type="search" placeholder="搜索文章标题、摘要">
+    </div>
+  </div>
+
+  <div class="alist" id="studyList"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block navtitle %}数据看板{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">支部风采 › <b>数据看板</b></div>
+  <div class="sec-head">
+    <h2>党建数据看板 {% if config.SHOW_DEMO_BADGE %}<span class="chip todo" style="font-size:10.5px">测试数据</span>{% endif %}</h2>
+    <span id="genAt">统计中…</span>
+  </div>
+
+  <div class="stats" id="dashStats">
+    <div class="stat"><b>—</b><span>加载中</span></div>
+  </div>
+
+  <div class="panel">
+    <h3>每月组织生活开展情况</h3>
+    <div class="sub">单位：次（含三会一课、主题党日、志愿服务），数据由活动表按月份实时聚合</div>
+    <div class="chart-bars" id="monthlyChart"></div>
+  </div>
+
+  <div class="panel">
+    <h3>党员构成</h3>
+    <div class="sub">按年龄段统计，数据来自党员档案字段</div>
+    <div class="donut-wrap">
+      <div id="donut" style="width:96px;height:96px;border-radius:50%;background:#eee;flex:none;
+           display:grid;place-items:center;position:relative">
+        <div style="width:62px;height:62px;border-radius:50%;background:#fff;display:grid;
+             place-items:center;flex-direction:column;text-align:center">
+          <b id="donutLabel" style="font-size:16px;color:#b01e23">0</b>
+          <span style="font-size:10px;color:#999">党员总数</span>
+        </div>
+      </div>
+      <div class="legend" id="memberLegend" style="flex:1"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>学习情况</h3>
+    <div class="sub">按学习专栏分类统计学习人次与累计时长</div>
+    <div id="learningTable"></div>
+  </div>
+
+  <div class="panel">
+    <h3>活动参与</h3>
+    <div class="sub">报名人数实时从报名表统计</div>
+    <div id="participation"></div>
+  </div>
+
+  <div class="panel">
+    <h3>党费缴纳情况</h3>
+    <div class="sub">来自党费表实时统计：缴费率 =（已缴 + 补缴）记录数 ÷ 应缴记录总数</div>
+    <div class="stats" id="duesStats">
+      <div class="stat"><b>—</b><span>加载中</span></div>
+    </div>
+    <div id="duesTrend"></div>
+  </div>
+</div>
+{% endblock %}

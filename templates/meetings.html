@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block navtitle %}三会一课{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">组织生活 › <b>三会一课</b></div>
+  <div class="sec-head">
+    <h2>三会一课</h2>
+    <span>{{ meetings|length }} 条记录</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-group="kind" data-val="all">全部</button>
+    <button class="tab" data-group="kind" data-val="meeting">支部党员大会</button>
+    <button class="tab" data-group="kind" data-val="party_day">主题党日</button>
+    <button class="tab" data-group="kind" data-val="study">党课学习</button>
+  </div>
+
+  <div id="meetingList" style="padding:12px 0 0">
+    {% for m in meetings %}
+    <a class="mcard" href="{{ url_for('pages.activity_detail', activity_id=m.id) }}">
+      <div class="top">
+        <h3>{{ m.title }}</h3>
+        <span class="chip {{ 'done' if m.status == 'finished' else 'todo' }}">
+          {{ '已完成' if m.status == 'finished' else '进行中' }}
+        </span>
+      </div>
+      <div class="mrow"><span>时间：</span>{{ m.start_at.strftime('%Y-%m-%d %H:%M') if m.start_at else '待定' }}</div>
+      <div class="mrow"><span>地点：</span>{{ m.location or '待定' }}</div>
+      <div class="mrow"><span>主持人：</span>{{ m.target or '支部书记' }}</div>
+      {% if m.content %}
+      <div class="agenda">{{ m.content | striptags | truncate(80) }}</div>
+      {% endif %}
+    </a>
+    {% else %}
+    <div class="empty on">暂无三会一课记录，管理员可在后台录入</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

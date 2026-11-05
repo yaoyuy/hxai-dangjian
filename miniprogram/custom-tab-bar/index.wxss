@@ -1,0 +1,22 @@
+/* 自定义 tabBar 样式 */
+.ctb-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(0, 0, 0, 0.35); z-index: 900; }
+
+.ctb-panel { position: fixed; left: 0; right: 0; bottom: 108rpx; background: #fff; z-index: 950; border-radius: 20rpx 20rpx 0 0; padding: 12rpx 0 20rpx; box-shadow: 0 -6rpx 24rpx rgba(0, 0, 0, 0.12); }
+.ctb-panel-head { display: flex; align-items: center; padding: 22rpx 32rpx; font-size: 30rpx; font-weight: 700; color: #b01e23; border-bottom: 1rpx solid #f2f2f2; }
+.ctb-panel-tip { font-size: 22rpx; color: #aaa; padding: 12rpx 32rpx 4rpx; }
+.ctb-subitem { display: flex; align-items: center; padding: 24rpx 32rpx; font-size: 29rpx; color: #333; border-bottom: 1rpx solid #f7f7f7; }
+.ctb-subitem:last-child { border-bottom: none; }
+.ctb-arrow { margin-left: auto; color: #ccc; font-size: 32rpx; }
+
+.ctb-bar { position: fixed; left: 0; right: 0; bottom: 0; height: 108rpx; background: #fff; border-top: 1rpx solid #ececec; display: flex; align-items: center; z-index: 960; padding-bottom: env(safe-area-inset-bottom); box-sizing: content-box; }
+
+.ctb-home { width: 150rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
+.ctb-home-ico { width: 46rpx; height: 46rpx; line-height: 46rpx; text-align: center; border-radius: 12rpx; background: #f2f2f2; color: #888; font-size: 24rpx; }
+.ctb-home.on .ctb-home-ico { background: #fdf0f0; color: #b01e23; }
+.ctb-home-txt { font-size: 22rpx; margin-top: 2rpx; }
+.ctb-home.on { color: #b01e23; }
+
+.ctb-main { flex: 1; display: flex; align-items: center; justify-content: center; color: #666; }
+.ctb-main-txt { font-size: 28rpx; }
+.ctb-main.on .ctb-main-txt { color: #b01e23; font-weight: 700; }
+.ctb-caret { font-size: 20rpx; margin-left: 6rpx; color: #bbb; }

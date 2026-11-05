@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:elif="{{a}}">
+    <view class="a-title">{{a.title}}</view>
+
+    <view class="a-meta">
+      <text class="mi tag" wx:if="{{a.category}}">{{a.category}}</text>
+      <text class="mi tag tag-gold" wx:if="{{a.media_type === 'video'}}">视频课</text>
+      <text class="mi demo-tag" wx:if="{{a.is_demo}}">测试数据</text>
+      <text class="mi" wx:if="{{a.published_at}}">发布：{{a.published_at}}</text>
+      <text class="mi" wx:if="{{a.duration_min}}">时长 {{a.duration_min}} 分钟</text>
+      <text class="mi">浏览 {{a.view_count}}</text>
+    </view>
+
+    <view class="a-summary" wx:if="{{a.summary}}">{{a.summary}}</view>
+
+    <view class="a-cover" wx:if="{{a.cover_url}}">
+      <image src="{{a.cover_url}}" mode="widthFix" />
+    </view>
+
+    <!-- 视频课：后端给了 video_url 才渲染播放器 -->
+    <video class="a-video" wx:if="{{a.media_type === 'video' && a.video_url}}" src="{{a.video_url}}" controls />
+    <view class="banner" wx:if="{{a.media_type === 'video' && !a.video_url}}">
+      <b>提示</b><text>这篇是视频课，但后端没有提供视频地址（video_url 为空），先以图文内容呈现。</text>
+    </view>
+
+    <!-- 正文：HTML 用 rich-text，纯文本按段渲染 -->
+    <rich-text class="a-content" wx:if="{{contentIsHtml}}" nodes="{{a.content}}" />
+    <block wx:else>
+      <view class="a-p" wx:for="{{paragraphs}}" wx:key="index">{{item}}</view>
+    </block>
+
+    <!-- 记录学习时长 -->
+    <view class="a-actions">
+      <view class="panel">
+        <view class="panel-h">记录学习时长</view>
+        <view class="panel-sub">
+          点击后会写入一条学习记录（POST /api/articles/{{a.id}}/study），本篇文章默认计入
+          {{a.study_minutes}} 分钟。看板的「学习完成率 / 累计学习小时」由这些记录实时统计。
+        </view>
+        <button class="btn primary block" loading="{{submitting}}" bindtap="recordStudy">记录学习时长</button>
+        <view class="hint" wx:if="{{recorded}}" style="text-align:center">
+          本次已记录，我的累计学习时长：{{myTotalMinutes}} 分钟
+        </view>
+      </view>
+    </view>
+
+    <view class="a-foot">
+      <text>学习记录会累计到「我的」和学习看板。</text>
+      <text bindtap="goStudy" style="color:#576b95;margin-top:8rpx">← 返回学习专栏</text>
+    </view>
+  </block>
+</view>

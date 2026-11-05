@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block navtitle %}我的{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="sec-head"><h2>我的</h2></div>
+
+  {% if current_user %}
+  <div class="panel">
+    <div class="acct-row">
+      <div class="avatar">{{ current_user.real_name[:2] if current_user.real_name else 'HX' }}</div>
+      <div>
+        <div class="acct-name">{{ current_user.real_name or current_user.username }}
+          <span class="chip {{ 'todo' if current_user.is_test_account else 'done' }}" style="font-size:10px">
+            {{ '测试账号' if current_user.is_test_account else '微信身份' }}
+          </span>
+        </div>
+        <div class="acct-desc">{{ current_user.branch.name if current_user.branch else '未分配支部' }} ·
+          {{ {'super_admin':'超级管理员','branch_admin':'支部管理员','member':'普通党员'}[current_user.role] }}</div>
+      </div>
+    </div>
+    <div class="mrow" style="margin-top:12px">
+      <span>登录方式：</span>{{ '本地测试登录（非微信身份）' if current_user.is_test_account else '微信网页授权' }}
+    </div>
+    <div class="mrow"><span>微信 openid：</span>{{ current_user.openid or '未获取（个人号无网页授权权限）' }}</div>
+    <div class="mrow"><span>累计学习：</span>{{ total_minutes }} 分钟（{{ (total_minutes / 60) | round(1) }} 小时）</div>
+    <div class="mrow"><span>我的报名：</span>{{ enrollments|length }} 场</div>
+    <div class="mrow"><span>账号角色：</span>{{ {'super_admin':'超级管理员','branch_admin':'支部管理员','member':'普通党员'}[current_user.role] }}</div>
+  </div>
+
+  <div class="panel">
+    <h3>我的报名</h3>
+    {% for e in enrollments %}
+    <div class="mrow" style="border-bottom:.5px solid #f0f0f0;padding:8px 0">
+      <a href="{{ url_for('pages.activity_detail', activity_id=e.activity_id) }}" style="color:#576b95">
+        {{ e.activity.title if e.activity else '活动' }}</a>
+      <span style="color:#999"> · {{ '已报名' if e.status == 'confirmed' else '已取消' }}
+        · {{ e.created_at.strftime('%m-%d %H:%M') if e.created_at else '' }}</span>
+    </div>
+    {% else %}
+    <div style="color:#999;font-size:13px">还没有报名记录</div>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <h3>我的党费</h3>
+    {% if dues_summary %}
+    <div class="mrow"><span>应缴记录：</span>{{ dues_summary.total }} 条 ·
+      已缴 {{ dues_summary.paid }} · 补缴 {{ dues_summary.late }} · 未缴 {{ dues_summary.unpaid }}</div>
+    <div class="mrow"><span>已缴金额：</span>¥{{ '%.2f'|format(dues_summary.amount_paid) }}
+      / 应缴 ¥{{ '%.2f'|format(dues_summary.amount_total) }}（缴费率 {{ '%.0f'|format(dues_summary.pay_rate) }}%）</div>
+    {% endif %}
+    {% for dd in dues %}
+    <div class="row-line" style="border-bottom:.5px solid #f0f0f0;padding:8px 0">
+      <span class="grow">{{ dd.period }} · {{ dd.method }}{% if dd.note %}（{{ dd.note }}）{% endif %}</span>
+      <b>¥{{ '%.2f'|format(dd.amount_float) }} · {{ dd.status_label }}</b>
+    </div>
+    {% else %}
+    <div style="color:#999;font-size:13px">还没有党费记录（支部在后台登记后会显示在这里）</div>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <h3>我的组织关系</h3>
+    <div class="mrow"><span>所在支部：</span>{{ current_user.branch.name if current_user.branch else '未分配' }}</div>
+    {% for t in transfers %}
+    <div class="row-line" style="border-bottom:.5px solid #f0f0f0;padding:8px 0">
+      <span class="grow">{{ t.direction_label }} · {{ t.from_org }} → {{ t.to_org }}
+        {% if t.review_note %}<br><span style="color:#999;font-size:12px">审核意见：{{ t.review_note }}</span>{% endif %}</span>
+      <b>{{ t.status_label }}</b>
+    </div>
+    {% else %}
+    <div style="color:#999;font-size:13px">还没有组织关系转接申请</div>
+    {% endfor %}
+    <details style="margin-top:10px">
+      <summary style="cursor:pointer;color:#576b95;font-size:13px">申请组织关系转接（转入 / 转出）</summary>
+      <form id="transferForm" style="margin-top:8px">
+        <div class="field"><label>方向</label>
+          <select id="trDirection">
+            <option value="in">转入本支部</option>
+            <option value="out">转出到其它单位</option>
+          </select>
+        </div>
+        <div class="field"><label>原单位 / 支部</label><input id="trFrom" placeholder="如：中共XX大学委员会" required></div>
+        <div class="field"><label>目标单位 / 支部</label><input id="trTo" placeholder="如：绵阳城市学院党委" required></div>
+        <div class="field"><label>原因（可选）</label><input id="trReason" placeholder="如：工作调动"></div>
+        <button class="btn" id="transferBtn" type="submit">提交申请</button>
+      </form>
+      <div class="hint">提交后状态为「待审核」，支部管理员在后台「组织关系转接」页处理，审核结果会显示在上面。</div>
+    </details>
+  </div>
+
+  {% if current_user.is_admin %}
+  <div class="form">
+    <a class="btn" href="{{ url_for('admin.index') }}">进入后台管理（录入文章 / 活动 / 台账）</a>
+  </div>
+  {% endif %}
+
+  <div class="form">
+    <a class="btn ghost" href="{{ url_for('pages.logout') }}">退出登录</a>
+  </div>
+
+  {% else %}
+  <div class="form">
+    <div class="notice blue"><b>未登录</b><br>当前为游客状态，可以浏览内容；报名、学习打卡需要登录。</div>
+    <a class="btn" href="{{ url_for('pages.login', next='/me') }}">测试登录</a>
+  </div>
+  {% endif %}
+
+  {% if config.SHOW_DEMO_BADGE %}
+  <div class="panel">
+    <h3>测试环境说明</h3>
+    <div class="sub" style="line-height:1.9">
+      第一阶段使用个人订阅号 HXAI云 测试。<br>
+      个人号可测：文章浏览、学习记录、活动报名、台账上传下载、看板统计（测试数据）。<br>
+      个人号不可测：微信网页授权登录、自定义菜单 API、模板消息、微信支付、JS-SDK 签名。
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+<view class="page">
+  <view class="crumb">组织生活 › <text>电子台账</text></view>
+  <view class="page-title">电子台账</view>
+  <view class="page-sub">会议记录、活动资料、学习材料与制度文件，可在线预览（需登录）。</view>
+
+  <scroll-view class="chips" scroll-x="true">
+    <view class="chip {{activeCat === item.name ? 'on' : ''}}"
+          wx:for="{{cats}}" wx:key="name"
+          data-name="{{item.name}}" bindtap="pickCat">
+      {{item.name}}<text wx:if="{{item.count !== null && item.count !== undefined}}">（{{item.count}}）</text>
+    </view>
+  </scroll-view>
+
+  <view class="searchbar">
+    <text class="searchbar-ico">搜</text>
+    <input class="searchbar-input" placeholder="搜索文件名或标题" confirm-type="search"
+           value="{{keyword}}" bindinput="onKeyword" bindconfirm="doSearch" />
+    <text style="color:#b01e23;font-size:26rpx" bindtap="doSearch">搜索</text>
+  </view>
+
+  <view class="sec-head">
+    <text class="sec-title">文件列表</text>
+    <text class="sec-extra">当前 {{total}} 个 / 全部 {{allTotal}} 个</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <view class="frow" wx:for="{{list}}" wx:key="id">
+      <view class="fic {{item.ext}}">{{item.ext}}</view>
+      <view class="frow-body">
+        <view class="frow-title">{{item.title}}</view>
+        <view class="frow-meta">{{item.original_name}}</view>
+        <view class="frow-meta">
+          <text class="tag">{{item.category}}</text>
+          <text>{{item.size_text}}</text>
+          <text>　下载 {{item.download_count}} 次</text>
+          <text wx:if="{{item.uploader}}">　{{item.uploader}}</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}" style="margin-left:10rpx">测试数据</text>
+        </view>
+        <view class="frow-meta">{{item.created_at}}</view>
+      </view>
+      <view class="frow-act">
+        <button class="btn primary small" loading="{{downloading === item.id}}" bindtap="download"
+                data-id="{{item.id}}" data-ext="{{item.ext}}">查看</button>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!list.length}}">没有匹配的台账文件</view>
+    <view class="hint">说明：下载接口 /api/ledger/&lt;id&gt;/download 需要登录，未登录会返回 401 并自动跳登录页。</view>
+  </block>
+</view>

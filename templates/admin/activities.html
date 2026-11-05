@@ -1,0 +1,70 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}活动管理{% endblock %}
+{% block content %}
+
+<h1 class="ad-h1">活动管理</h1>
+<p class="ad-desc">
+  三会一课、主题党日、志愿服务、集中学习都在这里建。状态为「进行中」且未过报名截止时间的活动，
+  党员在前台才能报名；报名人数由报名表实时统计，不存冗余字段。
+</p>
+
+<details class="ad-panel" {% if not activities %}open{% endif %}>
+  <summary><b>＋ 新建活动</b></summary>
+  <form method="post" action="{{ url_for('admin.activity_create') }}" class="ad-form">
+    <label>标题<input type="text" name="title" required maxlength="120" placeholder="例：11 月主题党日：学习与议事"></label>
+    <label>类型
+      <select name="kind">
+        {% for k, n in kinds %}<option value="{{ k }}">{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>开始时间<input type="datetime-local" name="start_at" required></label>
+    <label>报名截止<input type="datetime-local" name="signup_deadline"></label>
+    <label>地点<input type="text" name="location" placeholder="例：支部会议室"></label>
+    <label>参加对象<input type="text" name="target" value="全体党员、入党积极分子"></label>
+    <label>名额上限（0 表示不限）<input type="number" name="capacity" value="0" min="0"></label>
+    <label>简介<textarea name="summary" rows="2"></textarea></label>
+    <label>活动安排<textarea name="content" rows="6" placeholder="每行一条，例：1. 集中学习（30 分钟）"></textarea></label>
+    <label>状态
+      <select name="status">
+        {% for k, n in statuses %}<option value="{{ k }}">{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="ad-btn" type="submit">创建活动</button>
+  </form>
+</details>
+
+<div class="ad-panel">
+  <table class="ad-table">
+    <thead><tr><th>活动</th><th>类型</th><th>时间</th><th>报名</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for a in activities %}
+      <tr>
+        <td>
+          {{ a.title }}{% if a.is_demo %}<span class="ad-tag">测试数据</span>{% endif %}
+          {% if a.location %}<div class="ad-sub">{{ a.location }}</div>{% endif %}
+        </td>
+        <td>{{ a.kind_label if a.kind_label else a.kind }}</td>
+        <td>{{ a.start_at.strftime('%Y-%m-%d %H:%M') if a.start_at else '待定' }}</td>
+        <td>{{ a.enrolled_count }}{% if a.capacity %} / {{ a.capacity }}{% endif %}</td>
+        <td>
+          {% if a.status == 'open' %}<span class="ad-tag ok">进行中</span>
+          {% elif a.status == 'closed' %}<span class="ad-tag warn">已截止</span>
+          {% else %}<span class="ad-tag">已完成</span>{% endif %}
+        </td>
+        <td class="ad-ops">
+          <a href="{{ url_for('admin.activity_edit', activity_id=a.id) }}">编辑/名单</a>
+          <a href="{{ url_for('pages.activity_detail', activity_id=a.id) }}" target="_blank">前台</a>
+          <form method="post" action="{{ url_for('admin.activity_delete', activity_id=a.id) }}"
+                onsubmit="return confirm('删除活动会同时删除报名记录，确定？');">
+            <button class="ad-link danger" type="submit">删除</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="ad-empty">还没有活动</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

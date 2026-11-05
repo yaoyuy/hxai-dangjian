@@ -1,0 +1,52 @@
+<view class="page has-tabbar">
+  <view class="crumb">党建学习 › <text>学习专栏</text></view>
+  <view class="page-title">{{activeName}}</view>
+  <view class="page-sub">云党课、党史学习等栏目由左侧分类切换；文章均来自后端已发布内容。</view>
+
+  <!-- 分类 chip（来自 /api/categories，数量为已发布文章数） -->
+  <scroll-view class="chips" scroll-x="true">
+    <view class="chip {{activeCode === item.code ? 'on' : ''}}"
+          wx:for="{{cats}}" wx:key="code"
+          data-code="{{item.code}}" bindtap="pickCat">
+      {{item.name}}<text wx:if="{{item.count !== null && item.count !== undefined}}">（{{item.count}}）</text>
+    </view>
+  </scroll-view>
+
+  <!-- 搜索 -->
+  <view class="searchbar">
+    <text class="searchbar-ico">搜</text>
+    <input class="searchbar-input" placeholder="搜索标题或摘要" confirm-type="search"
+           value="{{keyword}}" bindinput="onKeyword" bindconfirm="doSearch" />
+    <text style="color:#b01e23;font-size:26rpx" bindtap="doSearch">搜索</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">正在加载…</view>
+  <view class="empty" wx:elif="{{errMsg}}">{{errMsg}}</view>
+
+  <block wx:else>
+    <view class="sec-head">
+      <text class="sec-title">文章列表</text>
+      <text class="sec-extra">共 {{total}} 篇</text>
+    </view>
+
+    <view class="acard" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goArticle">
+      <view class="acard-thumb">
+        <image class="acard-img" wx:if="{{item.cover_url}}" src="{{item.cover_url}}" mode="aspectFill" />
+        <view class="thumb-ph" wx:else>{{item.media_type === 'video' ? '视频' : '党建'}}</view>
+      </view>
+      <view class="acard-body">
+        <view class="acard-title">{{item.title}}</view>
+        <view class="acard-sum">{{item.summary}}</view>
+        <view class="acard-meta">
+          <text class="tag" wx:if="{{item.category}}">{{item.category}}</text>
+          <text class="tag tag-gold" wx:if="{{item.media_type === 'video'}}">视频课</text>
+          <text class="demo-tag" wx:if="{{item.is_demo}}">测试数据</text>
+          <text class="spacer"></text>
+          <text>{{item.published_at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{!list.length}}">该分类下暂无文章（后端只返回已发布内容）</view>
+  </block>
+</view>

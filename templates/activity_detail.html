@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block navtitle %}活动详情{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="crumb">组织生活 › <b>活动详情</b></div>
+  <div class="sec-head"><h2>{{ activity.title }}</h2>
+    {% if activity.is_demo %}<span class="chip todo">测试数据</span>{% endif %}
+  </div>
+
+  {% if activity.cover_url %}
+  <img src="{{ activity.cover_url }}" alt="" style="width:calc(100% - 32px);margin:10px 16px;border-radius:10px;aspect-ratio:2.4/1;object-fit:cover">
+  {% endif %}
+
+  <div class="panel">
+    <div class="mrow"><span>时间：</span>{{ activity.start_at.strftime('%Y-%m-%d %H:%M') if activity.start_at else '待定' }}</div>
+    <div class="mrow"><span>地点：</span>{{ activity.location or '待定' }}</div>
+    <div class="mrow"><span>对象：</span>{{ activity.target }}</div>
+    <div class="mrow"><span>报名截止：</span>{{ activity.signup_deadline.strftime('%Y-%m-%d %H:%M') if activity.signup_deadline else '未设置' }}</div>
+    <div class="mrow"><span>已报名：</span>{{ enrolled_count }} 人{% if activity.capacity %}（上限 {{ activity.capacity }} 人）{% endif %}</div>
+    {% if activity.capacity %}
+    <div class="bar"><i style="width:{{ (enrolled_count / activity.capacity * 100) | round | int }}%"></i></div>
+    {% endif %}
+  </div>
+
+  {% if activity.content %}
+  <div class="panel">
+    <h3>活动安排</h3>
+    <div style="font-size:14.5px;line-height:1.9;color:#444;margin-top:8px">{{ activity.content | safe }}</div>
+  </div>
+  {% endif %}
+
+  <div style="padding:0 16px 20px">
+    <button class="btn-join {{ 'joined' if my_enrolled else '' }}"
+            id="detailJoin" data-id="{{ activity.id }}"
+            data-enrolled="{{ 1 if my_enrolled else 0 }}"
+            style="width:100%;padding:13px;border-radius:8px">
+      {{ '已报名（点击取消）' if my_enrolled else ('名额已满' if full else '我要报名') }}
+    </button>
+    {% if not current_user %}
+    <div class="hint">当前未登录，报名前请先 <a href="{{ url_for('pages.login', next=request.path) }}" style="color:#576b95">测试登录</a></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
